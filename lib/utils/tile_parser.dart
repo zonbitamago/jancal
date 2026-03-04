@@ -7,6 +7,14 @@ class Tile {
 
   const Tile({required this.number, required this.type, required this.displayChar});
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Tile && other.number == number && other.type == type;
+
+  @override
+  int get hashCode => Object.hash(number, type);
+
   String get key => '$number$_typeSuffix';
 
   String get _typeSuffix {
