@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../utils/tile_parser.dart';
 
 class TilePainter extends CustomPainter {
@@ -156,7 +155,7 @@ class TilePainter extends CustomPainter {
     final painter = TextPainter(
       text: TextSpan(
         text: char,
-        style: GoogleFonts.notoSansJp(
+        style: TextStyle(
           color: color,
           fontSize: 28,
           fontWeight: FontWeight.w900,
