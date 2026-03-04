@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../utils/tile_parser.dart';
 
 class TilePainter extends CustomPainter {
@@ -62,13 +63,13 @@ class TilePainter extends CustomPainter {
   void _drawTileContent(Canvas canvas, Size size) {
     switch (tile.type) {
       case TileType.man:
-        _drawSuitTile(canvas, size, '${tile.number}', '萬', const Color(0xFFE53E3E));
+        _drawSuitTile(canvas, size, '${tile.number}', const Color(0xFFE53E3E));
         break;
       case TileType.pin:
-        _drawSuitTile(canvas, size, '${tile.number}', '筒', const Color(0xFF2B6CB0));
+        _drawSuitTile(canvas, size, '${tile.number}', const Color(0xFF2B6CB0));
         break;
       case TileType.sou:
-        _drawSuitTile(canvas, size, '${tile.number}', '索', const Color(0xFF2F855A));
+        _drawSuitTile(canvas, size, '${tile.number}', const Color(0xFF2F855A));
         break;
       case TileType.wind:
         _drawHonorTile(canvas, size, tile.displayChar, const Color(0xFF2D3748));
@@ -79,7 +80,7 @@ class TilePainter extends CustomPainter {
     }
   }
 
-  void _drawSuitTile(Canvas canvas, Size size, String number, String suit, Color color) {
+  void _drawSuitTile(Canvas canvas, Size size, String number, Color color) {
     // 数字
     final numPainter = TextPainter(
       text: TextSpan(
@@ -98,30 +99,64 @@ class TilePainter extends CustomPainter {
       Offset((size.width - numPainter.width) / 2, 2),
     );
 
-    // 漢字
-    final suitPainter = TextPainter(
-      text: TextSpan(
-        text: suit,
-        style: TextStyle(
-          color: color,
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-    suitPainter.layout();
-    suitPainter.paint(
-      canvas,
-      Offset((size.width - suitPainter.width) / 2, size.height - suitPainter.height - 4),
-    );
+    // スート記号（図形で描画 — フォント不要）
+    final centerX = size.width / 2;
+    final symbolY = size.height - 14.0;
+    final bgColor = isWinTile ? const Color(0xFFFFECB3) : const Color(0xFFF5F5F0);
+
+    switch (tile.type) {
+      case TileType.pin:
+        // 筒子: 二重丸
+        canvas.drawCircle(Offset(centerX, symbolY), 7, Paint()..color = color);
+        canvas.drawCircle(Offset(centerX, symbolY), 5, Paint()..color = bgColor);
+        canvas.drawCircle(Offset(centerX, symbolY), 3, Paint()..color = color);
+        break;
+      case TileType.sou:
+        // 索子: 竹（縦線 + 節）
+        final stickPaint = Paint()
+          ..color = color
+          ..strokeWidth = 2.5
+          ..strokeCap = StrokeCap.round;
+        canvas.drawLine(
+          Offset(centerX, symbolY - 7),
+          Offset(centerX, symbolY + 7),
+          stickPaint,
+        );
+        final nodePaint = Paint()
+          ..color = color
+          ..strokeWidth = 1.5
+          ..strokeCap = StrokeCap.round;
+        canvas.drawLine(
+          Offset(centerX - 4, symbolY - 2),
+          Offset(centerX + 4, symbolY - 2),
+          nodePaint,
+        );
+        canvas.drawLine(
+          Offset(centerX - 4, symbolY + 2),
+          Offset(centerX + 4, symbolY + 2),
+          nodePaint,
+        );
+        break;
+      case TileType.man:
+        // 萬子: 菱形
+        final path = Path()
+          ..moveTo(centerX, symbolY - 7)
+          ..lineTo(centerX + 7, symbolY)
+          ..lineTo(centerX, symbolY + 7)
+          ..lineTo(centerX - 7, symbolY)
+          ..close();
+        canvas.drawPath(path, Paint()..color = color);
+        break;
+      default:
+        break;
+    }
   }
 
   void _drawHonorTile(Canvas canvas, Size size, String char, Color color) {
     final painter = TextPainter(
       text: TextSpan(
         text: char,
-        style: TextStyle(
+        style: GoogleFonts.notoSansJp(
           color: color,
           fontSize: 28,
           fontWeight: FontWeight.w900,
