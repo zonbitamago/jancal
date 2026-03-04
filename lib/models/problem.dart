@@ -67,6 +67,19 @@ List<Problem> getProblemsForLevel(QuizLevel level) {
 const allProblems = <Problem>[
   // 初級
   Problem(
+    id: 'b9',
+    tiles: '11m 99m 11p 99p 11s 55z 77z',
+    winTile: '7z',
+    yaku: ['七対子'],
+    fu: 25,
+    han: 2,
+    isParent: false,
+    isTsumo: false,
+    correctAnswer: '1600',
+    choices: ['800', '1600', '2000', '3200'],
+    hint: '25符2翻 子のロン → 1600点。七対子は25符固定です。',
+  ),
+  Problem(
     id: 'b1',
     tiles: '123m 456p 789s 11z',
     winTile: '1z',
@@ -284,6 +297,19 @@ const allProblems = <Problem>[
     choices: ['3200', '6400', '8000', '12000'],
     hint: '25符4翻 子のロン → 6400点。七対子は25符固定。',
   ),
+  Problem(
+    id: 'i9',
+    tiles: '22m 88m 33p 77p 44s 11z 66z',
+    winTile: '6z',
+    yaku: ['リーチ', '七対子'],
+    fu: 25,
+    han: 3,
+    isParent: false,
+    isTsumo: false,
+    correctAnswer: '3200',
+    choices: ['1600', '2600', '3200', '6400'],
+    hint: '25符3翻 子のロン → 3200点。七対子(2翻)+リーチ(1翻)。',
+  ),
 
   // 上級
   Problem(
@@ -382,6 +408,19 @@ const allProblems = <Problem>[
     correctAnswer: '18000',
     choices: ['12000', '18000', '24000', '36000'],
     hint: '跳満 親ロン → 18000点。親は子の1.5倍。',
+  ),
+  Problem(
+    id: 'a9',
+    tiles: '11m 33m 55m 99m 11z 55z 77z',
+    winTile: '7z',
+    yaku: ['リーチ', '七対子', '混一色'],
+    fu: 25,
+    han: 6,
+    isParent: false,
+    isTsumo: false,
+    correctAnswer: '12000',
+    choices: ['8000', '12000', '16000', '24000'],
+    hint: '跳満 子のロン → 12000点。七対子(2翻)+混一色(3翻)+リーチ(1翻)=6翻。',
   ),
   Problem(
     id: 'a8',
