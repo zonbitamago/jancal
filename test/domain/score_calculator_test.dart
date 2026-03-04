@@ -28,9 +28,9 @@ void main() {
 
     // TDDサイクル 1-4: 満貫以上
     group('満貫以上', () {
-      test('30符4翻 子ロン → 8000 (切り上げ満貫)', () {
+      test('30符4翻 子ロン → 7700 (切り上げ満貫なし)', () {
         final result = calculateScore(fu: 30, han: 4, isParent: false, isTsumo: false);
-        expect(result.toAnswerString(), '8000');
+        expect(result.toAnswerString(), '7700');
       });
 
       test('25符4翻 子ロン → 6400 (切り上げ満貫ではない)', () {

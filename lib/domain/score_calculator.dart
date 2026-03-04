@@ -16,7 +16,7 @@ ScoreResult calculateScore({
     basePoints = 4000; // 倍満
   } else if (han >= 6) {
     basePoints = 3000; // 跳満
-  } else if (han >= 5 || (han == 4 && fu >= 30) || (han == 3 && fu >= 60)) {
+  } else if (han >= 5) {
     basePoints = 2000; // 満貫
   } else {
     basePoints = fu * (1 << (han + 2));

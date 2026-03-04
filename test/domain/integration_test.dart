@@ -146,13 +146,13 @@ void main() {
       (id: 'b7', fu: 30, han: 2, isP: false, isT: false, ans: '2000'),
       (id: 'b8', fu: 30, han: 3, isP: false, isT: false, ans: '3900'),
       // 中級
-      (id: 'i1', fu: 30, han: 4, isP: false, isT: false, ans: '8000'),
+      (id: 'i1', fu: 30, han: 4, isP: false, isT: false, ans: '7700'),
       (id: 'i2', fu: 30, han: 3, isP: false, isT: false, ans: '3900'),
-      (id: 'i3', fu: 30, han: 4, isP: false, isT: false, ans: '8000'),
+      (id: 'i3', fu: 30, han: 4, isP: false, isT: false, ans: '7700'),
       (id: 'i4', fu: 20, han: 4, isP: false, isT: true, ans: '1300/2600'),
       (id: 'i5', fu: 40, han: 4, isP: false, isT: false, ans: '8000'),
-      (id: 'i6', fu: 30, han: 4, isP: true, isT: true, ans: '4000 all'),
-      (id: 'i7', fu: 30, han: 4, isP: false, isT: true, ans: '2000/4000'),
+      (id: 'i6', fu: 30, han: 4, isP: true, isT: true, ans: '3900 all'),
+      (id: 'i7', fu: 30, han: 4, isP: false, isT: true, ans: '2000/3900'),
       (id: 'i8', fu: 25, han: 4, isP: false, isT: false, ans: '6400'),
       // 上級
       (id: 'a1', fu: 20, han: 6, isP: false, isT: true, ans: '3000/6000'),
