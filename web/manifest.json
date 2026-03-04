@@ -1,11 +1,11 @@
 {
-    "name": "jancal",
-    "short_name": "jancal",
+    "name": "雀カル - 麻雀点数計算トレーニング",
+    "short_name": "雀カル",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0c1222",
+    "theme_color": "#0d2847",
+    "description": "麻雀の点数計算をクイズ形式で練習するトレーニングアプリ",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
