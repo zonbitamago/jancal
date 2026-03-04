@@ -98,57 +98,40 @@ class TilePainter extends CustomPainter {
       Offset((size.width - numPainter.width) / 2, 2),
     );
 
-    // スート記号（図形で描画 — フォント不要）
-    final centerX = size.width / 2;
-    final symbolY = size.height - 14.0;
-    final bgColor = isWinTile ? const Color(0xFFFFECB3) : const Color(0xFFF5F5F0);
-
+    // スート漢字
+    String suitChar;
     switch (tile.type) {
+      case TileType.man:
+        suitChar = '萬';
+        break;
       case TileType.pin:
-        // 筒子: 二重丸
-        canvas.drawCircle(Offset(centerX, symbolY), 7, Paint()..color = color);
-        canvas.drawCircle(Offset(centerX, symbolY), 5, Paint()..color = bgColor);
-        canvas.drawCircle(Offset(centerX, symbolY), 3, Paint()..color = color);
+        suitChar = '筒';
         break;
       case TileType.sou:
-        // 索子: 竹（縦線 + 節）
-        final stickPaint = Paint()
-          ..color = color
-          ..strokeWidth = 2.5
-          ..strokeCap = StrokeCap.round;
-        canvas.drawLine(
-          Offset(centerX, symbolY - 7),
-          Offset(centerX, symbolY + 7),
-          stickPaint,
-        );
-        final nodePaint = Paint()
-          ..color = color
-          ..strokeWidth = 1.5
-          ..strokeCap = StrokeCap.round;
-        canvas.drawLine(
-          Offset(centerX - 4, symbolY - 2),
-          Offset(centerX + 4, symbolY - 2),
-          nodePaint,
-        );
-        canvas.drawLine(
-          Offset(centerX - 4, symbolY + 2),
-          Offset(centerX + 4, symbolY + 2),
-          nodePaint,
-        );
-        break;
-      case TileType.man:
-        // 萬子: 菱形
-        final path = Path()
-          ..moveTo(centerX, symbolY - 7)
-          ..lineTo(centerX + 7, symbolY)
-          ..lineTo(centerX, symbolY + 7)
-          ..lineTo(centerX - 7, symbolY)
-          ..close();
-        canvas.drawPath(path, Paint()..color = color);
+        suitChar = '索';
         break;
       default:
-        break;
+        return;
     }
+    final suitPainter = TextPainter(
+      text: TextSpan(
+        text: suitChar,
+        style: TextStyle(
+          color: color,
+          fontSize: 14,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    suitPainter.layout();
+    suitPainter.paint(
+      canvas,
+      Offset(
+        (size.width - suitPainter.width) / 2,
+        size.height - suitPainter.height - 4,
+      ),
+    );
   }
 
   void _drawHonorTile(Canvas canvas, Size size, String char, Color color) {
