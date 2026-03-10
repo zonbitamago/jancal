@@ -2,7 +2,6 @@ name: Test
 
 on:
   push:
-  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -11,10 +10,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+      - uses: actions/setup-node@v4
         with:
-          channel: stable
+          node-version: 20
+          cache: npm
 
-      - run: flutter pub get
+      - run: npm ci
 
-      - run: flutter test
+      - run: npm test

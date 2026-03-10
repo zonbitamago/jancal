@@ -4,8 +4,11 @@
 麻雀の点数計算をクイズ形式で練習するアプリ。
 
 ## 技術スタック
-- Flutter (Dart SDK >=3.3.0)
-- 対象: iOS / Android
+- React + TypeScript
+- Vite (ビルドツール)
+- Vitest (テストフレームワーク)
+- React Router (画面遷移)
+- 対象: Web
 
 ## 画面構成
 - ホーム画面（レベル選択）
@@ -14,27 +17,42 @@
 
 ## デザイン方針
 - ダークテーマ（#0c1222〜#0d2847のグラデーション）
-- 牌はCustomPaintで描画（画像アセット不要）
+- 牌はReactコンポーネントで描画（画像アセット不要）
 - 萬子=赤、筒子=青、索子=緑
 - アガリ牌はゴールドハイライト、ドラは赤枠
 
-## ドメイン層ファイル構成
+## ファイル構成
 
 ```
-lib/domain/
-├── hand_analyzer.dart      # 面子分解（バックトラッキング）+ 副露対応
-├── yaku_judge.dart         # 役判定（Mリーグ準拠 23役+役満3種）
-├── fu_calculator.dart      # 符計算（Mリーグルール: 連風牌2符）
-├── score_calculator.dart   # 点数計算（切り上げ満貫あり、数え役満なし）
-├── problem_generator.dart  # 動的問題生成エンジン
-└── models/
-    ├── hand.dart           # Hand(+openMentsu), HandDecomposition, Chitoitsu/Kokushi
-    ├── mentsu.dart         # Mentsu, MentsuType
-    ├── score_result.dart   # ScoreResult
-    └── wait_type.dart      # WaitType
-
-lib/services/
-└── stats_service.dart      # 統計データ永続化（SharedPreferences）
+src/
+├── domain/
+│   ├── handAnalyzer.ts        # 面子分解（バックトラッキング）+ 副露対応
+│   ├── yakuJudge.ts           # 役判定（Mリーグ準拠 23役+役満3種）
+│   ├── fuCalculator.ts        # 符計算（Mリーグルール: 連風牌2符）
+│   ├── scoreCalculator.ts     # 点数計算（切り上げ満貫あり、数え役満なし）
+│   ├── problemGenerator.ts    # 動的問題生成エンジン
+│   └── models/
+│       ├── hand.ts            # Hand, HandDecomposition, Chitoitsu/Kokushi
+│       ├── mentsu.ts          # Mentsu, MentsuType
+│       ├── scoreResult.ts     # ScoreResult
+│       └── waitType.ts        # WaitType
+├── models/
+│   └── problem.ts             # Problem, QuizLevel, allProblems
+├── utils/
+│   └── tileParser.ts          # Tile, TileGroup, parseTiles, parseTileGroups
+├── services/
+│   └── statsService.ts        # 統計データ永続化（localStorage）
+├── components/
+│   ├── TileWidget.tsx         # 牌1枚の描画
+│   ├── TileGroupWidget.tsx    # 牌グループの描画
+│   └── Badge.tsx              # 情報バッジ
+├── screens/
+│   ├── HomeScreen.tsx         # レベル選択画面
+│   └── QuizScreen.tsx         # クイズ画面
+├── styles/
+│   └── app.css                # グローバルスタイル
+├── App.tsx                    # ルーティング
+└── main.tsx                   # エントリポイント
 ```
 
 パイプライン: 手牌 → analyzeHand() → judgeYaku() → calculateFu() → calculateScore()
@@ -52,17 +70,14 @@ lib/services/
 
 ```bash
 # 全テスト
-flutter test
+npm test
 
-# ドメイン層のみ
-flutter test test/domain/
+# ウォッチモード
+npm run test:watch
 
-# 個別ファイル
-flutter test test/domain/score_calculator_test.dart
-flutter test test/domain/fu_calculator_test.dart
-flutter test test/domain/hand_analyzer_test.dart
-flutter test test/domain/yaku_judge_test.dart
-flutter test test/domain/integration_test.dart
-flutter test test/domain/open_hand_test.dart
-flutter test test/domain/problem_generator_test.dart
+# ビルド
+npm run build
+
+# 開発サーバー
+npm run dev
 ```
