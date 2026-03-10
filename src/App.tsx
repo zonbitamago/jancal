@@ -4,7 +4,7 @@ import { HomeScreen } from './screens/HomeScreen';
 import { QuizScreen } from './screens/QuizScreen';
 
 const App: React.FC = () => (
-  <BrowserRouter>
+  <BrowserRouter basename="/jancal">
     <Routes>
       <Route path="/" element={<HomeScreen />} />
       <Route path="/quiz" element={<QuizScreen />} />
