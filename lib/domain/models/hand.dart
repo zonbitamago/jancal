@@ -54,6 +54,7 @@ class Hand {
   final List<Tile> dora;
   final Tile? seatWind;
   final Tile? roundWind;
+  final List<Mentsu> openMentsu;
 
   const Hand({
     required this.tiles,
@@ -66,5 +67,6 @@ class Hand {
     this.dora = const [],
     this.seatWind,
     this.roundWind,
+    this.openMentsu = const [],
   });
 }

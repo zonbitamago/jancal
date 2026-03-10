@@ -11,6 +11,9 @@ class Problem {
   final String correctAnswer;
   final List<String> choices;
   final String hint;
+  /// 副露（鳴き）グループのインデックス（0始まり、スペース区切りのグループ位置）
+  /// 例: [0, 1] → 最初の2グループが副露
+  final List<int> openGroups;
 
   const Problem({
     required this.id,
@@ -25,7 +28,10 @@ class Problem {
     required this.correctAnswer,
     required this.choices,
     required this.hint,
+    this.openGroups = const [],
   });
+
+  bool get isOpen => openGroups.isNotEmpty;
 
   String get levelLabel {
     if (id.startsWith('b')) return '初級';
@@ -101,9 +107,9 @@ const allProblems = <Problem>[
     han: 2,
     isParent: false,
     isTsumo: true,
-    correctAnswer: '1000/2000',
+    correctAnswer: '500/1000',
     choices: ['500/1000', '1000/2000', '2000/3900', '1300/2600'],
-    hint: '30符2翻 子のツモ → 1000/2000点。子/親の支払いです。',
+    hint: '30符2翻 子のツモ → 500/1000点。子/親の支払いです。',
   ),
   Problem(
     id: 'b3',
@@ -127,9 +133,9 @@ const allProblems = <Problem>[
     han: 3,
     isParent: false,
     isTsumo: true,
-    correctAnswer: '1300/2600',
+    correctAnswer: '700/1300',
     choices: ['700/1300', '1300/2600', '2000/3900', '2000/4000'],
-    hint: '20符3翻 子のツモ → 1300/2600点。ピンフツモは20符計算。',
+    hint: '20符3翻 子のツモ → 700/1300点。ピンフツモは20符計算。',
   ),
   Problem(
     id: 'b5',
@@ -141,9 +147,9 @@ const allProblems = <Problem>[
     han: 2,
     isParent: true,
     isTsumo: false,
-    correctAnswer: '2000',
+    correctAnswer: '2900',
     choices: ['1000', '2000', '2900', '3900'],
-    hint: '30符2翻 親のロン → 2000点。※ドラ表示は3mですが手牌にはドラなし。',
+    hint: '30符2翻 親のロン → 2900点。※ドラ表示は3mですが手牌にはドラなし。',
   ),
   Problem(
     id: 'b6',
@@ -238,9 +244,9 @@ const allProblems = <Problem>[
     han: 4,
     isParent: false,
     isTsumo: true,
-    correctAnswer: '2000/4000',
+    correctAnswer: '1300/2600',
     choices: ['1300/2600', '2000/3900', '2000/4000', '4000/8000'],
-    hint: '20符4翻 → 満貫ツモ 2000/4000。ピンフツモは20符。',
+    hint: '20符4翻 子のツモ → 1300/2600点。20符4翻は満貫にならない（基本点1280）。',
   ),
   Problem(
     id: 'i5',
@@ -434,5 +440,117 @@ const allProblems = <Problem>[
     correctAnswer: '8000/16000',
     choices: ['4000/8000', '6000/12000', '8000/16000', '16000/32000'],
     hint: '役満 子ツモ → 8000/16000。四暗刻は役満！',
+  ),
+
+  // === 副露（鳴き）あり問題 ===
+
+  // 初級：タンヤオのみ（鳴きタンヤオ）
+  Problem(
+    id: 'b10',
+    tiles: '234m 567p 345s 678s 55m',
+    winTile: '5m',
+    yaku: ['タンヤオ'],
+    fu: 30,
+    han: 1,
+    isParent: false,
+    isTsumo: false,
+    correctAnswer: '1000',
+    choices: ['1000', '1300', '2000', '2600'],
+    hint: '30符1翻 子のロン → 1000点。鳴きタンヤオの基本形。',
+    openGroups: [0],
+  ),
+  // 初級：役牌のみ（白ポン）
+  Problem(
+    id: 'b11',
+    tiles: '555z 234m 678p 456s 33p',
+    winTile: '3p',
+    yaku: ['役牌'],
+    fu: 40,
+    han: 1,
+    isParent: false,
+    isTsumo: false,
+    correctAnswer: '1300',
+    choices: ['1000', '1300', '2000', '2600'],
+    hint: '40符1翻 子のロン → 1300点。白ポンの役牌。副露の刻子は明刻扱い(中張4符/么九8符)。',
+    openGroups: [0],
+  ),
+
+  // 中級：役牌+ドラ（鳴き2翻）
+  Problem(
+    id: 'i10',
+    tiles: '777z 345m 678p 456s 22m',
+    winTile: '2m',
+    yaku: ['役牌'],
+    dora: ['7z'],
+    fu: 40,
+    han: 2,
+    isParent: false,
+    isTsumo: false,
+    correctAnswer: '2600',
+    choices: ['1300', '2000', '2600', '5200'],
+    hint: '40符2翻 子のロン → 2600点。中ポン+ドラ1。',
+    openGroups: [0],
+  ),
+  // 中級：トイトイ（鳴き）
+  Problem(
+    id: 'i11',
+    tiles: '222m 555p 888s 333m 77s',
+    winTile: '7s',
+    yaku: ['トイトイ'],
+    dora: ['8s'],
+    fu: 40,
+    han: 3,
+    isParent: false,
+    isTsumo: false,
+    correctAnswer: '5200',
+    choices: ['2600', '3900', '5200', '8000'],
+    hint: '40符3翻 子のロン → 5200点。トイトイ+ドラ1。鳴きでも2翻。',
+    openGroups: [0, 1],
+  ),
+  // 中級：混一色（食い下がり2翻）
+  Problem(
+    id: 'i12',
+    tiles: '123p 456p 789p 11z 567p',
+    winTile: '1z',
+    yaku: ['混一色'],
+    fu: 30,
+    han: 2,
+    isParent: false,
+    isTsumo: false,
+    correctAnswer: '2000',
+    choices: ['1000', '2000', '3900', '7700'],
+    hint: '30符2翻 子のロン → 2000点。鳴き混一色は食い下がり2翻。',
+    openGroups: [0],
+  ),
+
+  // 上級：三色同順（食い下がり）+ 役牌
+  Problem(
+    id: 'a10',
+    tiles: '234m 234p 234s 666z 33s',
+    winTile: '3s',
+    yaku: ['三色同順', '役牌'],
+    fu: 40,
+    han: 2,
+    isParent: false,
+    isTsumo: false,
+    correctAnswer: '2600',
+    choices: ['1300', '2000', '2600', '5200'],
+    hint: '40符2翻 子のロン → 2600点。鳴き三色(1翻)+發ポン(1翻)。',
+    openGroups: [0, 3],
+  ),
+  // 上級：清一色（食い下がり5翻）
+  Problem(
+    id: 'a11',
+    tiles: '123s 345s 567s 789s 22s',
+    winTile: '2s',
+    yaku: ['清一色'],
+    fu: 30,
+    han: 5,
+    isParent: false,
+    isTsumo: false,
+    correctAnswer: '8000',
+    choices: ['6400', '8000', '12000', '16000'],
+    hint: '鳴き清一色 5翻 → 満貫 8000点。食い下がりでも5翻は満貫。',
+    openGroups: [0, 1],
   ),
 ];

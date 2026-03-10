@@ -22,15 +22,19 @@
 
 ```
 lib/domain/
-├── hand_analyzer.dart     # 面子分解（バックトラッキング）
-├── yaku_judge.dart        # 役判定（Mリーグ準拠 23役+役満3種）
-├── fu_calculator.dart     # 符計算（Mリーグルール: 連風牌2符）
-├── score_calculator.dart  # 点数計算（切り上げ満貫あり、数え役満なし）
+├── hand_analyzer.dart      # 面子分解（バックトラッキング）+ 副露対応
+├── yaku_judge.dart         # 役判定（Mリーグ準拠 23役+役満3種）
+├── fu_calculator.dart      # 符計算（Mリーグルール: 連風牌2符）
+├── score_calculator.dart   # 点数計算（切り上げ満貫あり、数え役満なし）
+├── problem_generator.dart  # 動的問題生成エンジン
 └── models/
-    ├── hand.dart          # Hand, HandDecomposition, Chitoitsu/Kokushi
-    ├── mentsu.dart        # Mentsu, MentsuType
-    ├── score_result.dart  # ScoreResult
-    └── wait_type.dart     # WaitType
+    ├── hand.dart           # Hand(+openMentsu), HandDecomposition, Chitoitsu/Kokushi
+    ├── mentsu.dart         # Mentsu, MentsuType
+    ├── score_result.dart   # ScoreResult
+    └── wait_type.dart      # WaitType
+
+lib/services/
+└── stats_service.dart      # 統計データ永続化（SharedPreferences）
 ```
 
 パイプライン: 手牌 → analyzeHand() → judgeYaku() → calculateFu() → calculateScore()
@@ -59,4 +63,6 @@ flutter test test/domain/fu_calculator_test.dart
 flutter test test/domain/hand_analyzer_test.dart
 flutter test test/domain/yaku_judge_test.dart
 flutter test test/domain/integration_test.dart
+flutter test test/domain/open_hand_test.dart
+flutter test test/domain/problem_generator_test.dart
 ```
