@@ -71,11 +71,11 @@ describe('統合テスト: score_calculator直接', () => {
   const directTests = [
     { id: 'b1', fu: 30, han: 2, isP: false, isT: false, ym: false, ans: '2000' },
     { id: 'b2', fu: 30, han: 2, isP: false, isT: true, ym: false, ans: '500/1000' },
-    { id: 'b3', fu: 30, han: 2, isP: false, isT: false, ym: false, ans: '2000' },
+    { id: 'b3', fu: 30, han: 1, isP: false, isT: false, ym: false, ans: '1000' },
     { id: 'b4', fu: 20, han: 3, isP: false, isT: true, ym: false, ans: '700/1300' },
     { id: 'b5', fu: 30, han: 2, isP: true, isT: false, ym: false, ans: '2900' },
-    { id: 'b6', fu: 30, han: 2, isP: false, isT: false, ym: false, ans: '2000' },
-    { id: 'b7', fu: 30, han: 2, isP: false, isT: false, ym: false, ans: '2000' },
+    { id: 'b6', fu: 40, han: 1, isP: false, isT: false, ym: false, ans: '1300' },
+    { id: 'b7', fu: 20, han: 2, isP: false, isT: false, ym: false, ans: '1300' },
     { id: 'b8', fu: 30, han: 3, isP: false, isT: false, ym: false, ans: '3900' },
     { id: 'i1', fu: 30, han: 4, isP: false, isT: false, ym: false, ans: '8000' },
     { id: 'i2', fu: 30, han: 3, isP: false, isT: false, ym: false, ans: '3900' },
@@ -130,10 +130,10 @@ describe('統合テスト: 手牌→点数 E2E', () => {
     expect(answer).toBe('2000');
   });
 
-  test('i8: タンヤオ+七対子 25符4翻 子ロン 6400', () => {
+  test('i8: 七対子+ドラ2 25符4翻 子ロン 6400', () => {
     const answer = calculateScoreFromHand({
       tilesStr: '22m 44p 66p 33s 77s 88s 99m', winTileStr: '9m',
-      isTsumo: false, isParent: false, yakuNames: ['タンヤオ', '七対子'],
+      isTsumo: false, isParent: false, yakuNames: ['七対子'],
       doraStrs: ['9m'],
     });
     expect(answer).toBe('6400');
@@ -181,12 +181,12 @@ describe('統合テスト: 手牌→点数 E2E', () => {
     expect(answer).toBe('1000/2000');
   });
 
-  test('b6: タンヤオ+ドラ 子ロン', () => {
+  test('b6: タンヤオ+ドラ2 40符3翻 子ロン 5200', () => {
     const answer = calculateScoreFromHand({
-      tilesStr: '234m 345m 678p 99s 456s', winTileStr: '9s',
+      tilesStr: '234m 345m 678p 55s 456s', winTileStr: '5s',
       isTsumo: false, isParent: false, yakuNames: ['タンヤオ'],
       doraStrs: ['4m'],
     });
-    expect(answer).toBeTruthy();
+    expect(answer).toBe('5200');
   });
 });

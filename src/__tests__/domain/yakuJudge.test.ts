@@ -415,4 +415,27 @@ describe('YakuJudge', () => {
     expect(yaku.find(y => y.name === '大三元')!.han).toBe(13);
     expect(yaku.length).toBe(1);
   });
+
+  test('四暗刻 ロン+双碰待ち → 不成立（トイトイのみ）', () => {
+    const tiles = parseTiles('111m 444p 777s 222m 55z');
+    const hand = createHand({ tiles, winTile: _t(2, TileType.man), isTsumo: false, isMenzen: true });
+    const decomp = new HandDecomposition(
+      [_anko(1, TileType.man), _anko(4, TileType.pin), _anko(7, TileType.sou), _anko(2, TileType.man)],
+      [_t(5, TileType.dragon), _t(5, TileType.dragon)], WaitType.shanpon
+    );
+    const yaku = judgeYaku(hand, decomp);
+    expect(yaku.some(y => y.name === '四暗刻')).toBe(false);
+    expect(yaku.some(y => y.name === 'トイトイ')).toBe(true);
+  });
+
+  test('ピンフ: 役牌雀頭(三元牌) → 不成立', () => {
+    const tiles = parseTiles('234m 456p 678s 345m 55z');
+    const hand = createHand({ tiles, winTile: _t(4, TileType.man), isMenzen: true });
+    const decomp = new HandDecomposition(
+      [_shuntsu(2, TileType.man), _shuntsu(4, TileType.pin), _shuntsu(6, TileType.sou), _shuntsu(3, TileType.man)],
+      [_t(5, TileType.dragon), _t(5, TileType.dragon)], WaitType.ryanmen
+    );
+    const yaku = judgeYaku(hand, decomp);
+    expect(yaku.some(y => y.name === 'ピンフ')).toBe(false);
+  });
 });

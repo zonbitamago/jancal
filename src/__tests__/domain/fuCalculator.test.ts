@@ -70,7 +70,7 @@ describe('FuCalculator', () => {
   test('両面待ち → 0符', () => { expect(waitTypeFu(WaitType.ryanmen)).toBe(0); });
   test('双碰待ち → 0符', () => { expect(waitTypeFu(WaitType.shanpon)).toBe(0); });
 
-  test('役牌雀頭(三元牌) → 2符', () => {
+  test('三元牌雀頭+門前ロン → 40符 (base20 + 門前ロン10 + 雀頭2 = 32→切上40)', () => {
     const decomp = new HandDecomposition(
       [_shuntsu(1, TileType.man), _shuntsu(4, TileType.pin), _shuntsu(7, TileType.sou), _shuntsu(2, TileType.man)],
       [_t(5, TileType.dragon), _t(5, TileType.dragon)], WaitType.ryanmen
@@ -78,7 +78,7 @@ describe('FuCalculator', () => {
     expect(calculateFu({ decomposition: decomp, isTsumo: false, isMenzen: true, isPinfu: false })).toBe(40);
   });
 
-  test('暗刻含み手牌の符計算', () => {
+  test('暗刻+門前ロン → 40符 (base20 + 門前ロン10 + 暗刻4 = 34→切上40)', () => {
     const decomp = new HandDecomposition(
       [_anko(2, TileType.man), _shuntsu(3, TileType.pin), _shuntsu(6, TileType.pin), _shuntsu(5, TileType.sou)],
       [_t(9, TileType.sou), _t(9, TileType.sou)], WaitType.ryanmen
@@ -86,7 +86,7 @@ describe('FuCalculator', () => {
     expect(calculateFu({ decomposition: decomp, isTsumo: false, isMenzen: true, isPinfu: false })).toBe(40);
   });
 
-  test('ツモ符(ピンフ以外) → 2符加算', () => {
+  test('暗刻+門前ツモ → 30符 (base20 + ツモ2 + 暗刻4 = 26→切上30)', () => {
     const decomp = new HandDecomposition(
       [_anko(2, TileType.man), _shuntsu(3, TileType.pin), _shuntsu(6, TileType.pin), _shuntsu(5, TileType.sou)],
       [_t(9, TileType.sou), _t(9, TileType.sou)], WaitType.ryanmen
@@ -120,5 +120,25 @@ describe('FuCalculator', () => {
       [_t(3, TileType.sou), _t(3, TileType.sou)], WaitType.ryanmen
     );
     expect(calculateFu({ decomposition: decomp, isTsumo: false, isMenzen: false, isPinfu: false })).toBe(30);
+  });
+
+  test('明槓(中張牌) → 8符', () => {
+    const minkan = new Mentsu(MentsuType.minkan, [_t(5, TileType.man), _t(5, TileType.man), _t(5, TileType.man), _t(5, TileType.man)]);
+    expect(minkan.fuValue).toBe(8);
+  });
+
+  test('明槓(么九牌) → 16符', () => {
+    const minkan = new Mentsu(MentsuType.minkan, [_t(1, TileType.pin), _t(1, TileType.pin), _t(1, TileType.pin), _t(1, TileType.pin)]);
+    expect(minkan.fuValue).toBe(16);
+  });
+
+  test('暗槓(中張牌) → 16符', () => {
+    const ankan = new Mentsu(MentsuType.ankan, [_t(5, TileType.sou), _t(5, TileType.sou), _t(5, TileType.sou), _t(5, TileType.sou)]);
+    expect(ankan.fuValue).toBe(16);
+  });
+
+  test('暗槓(么九牌) → 32符', () => {
+    const ankan = new Mentsu(MentsuType.ankan, [_t(9, TileType.man), _t(9, TileType.man), _t(9, TileType.man), _t(9, TileType.man)]);
+    expect(ankan.fuValue).toBe(32);
   });
 });

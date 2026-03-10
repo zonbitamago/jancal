@@ -156,5 +156,37 @@ describe('ScoreCalculator', () => {
       const result = calculateScore({ fu: 20, han: 4, isParent: false, isTsumo: true });
       expect(result.toAnswerString()).toBe('1300/2600');
     });
+
+    test('20符2翻 子ロン → 1300', () => {
+      const result = calculateScore({ fu: 20, han: 2, isParent: false, isTsumo: false });
+      expect(result.toAnswerString()).toBe('1300');
+    });
+  });
+
+  describe('1翻パターン', () => {
+    test('30符1翻 子ロン → 1000', () => {
+      const result = calculateScore({ fu: 30, han: 1, isParent: false, isTsumo: false });
+      expect(result.toAnswerString()).toBe('1000');
+    });
+
+    test('40符1翻 子ロン → 1300', () => {
+      const result = calculateScore({ fu: 40, han: 1, isParent: false, isTsumo: false });
+      expect(result.toAnswerString()).toBe('1300');
+    });
+
+    test('30符1翻 親ロン → 1500', () => {
+      const result = calculateScore({ fu: 30, han: 1, isParent: true, isTsumo: false });
+      expect(result.toAnswerString()).toBe('1500');
+    });
+
+    test('30符1翻 子ツモ → 300/500', () => {
+      const result = calculateScore({ fu: 30, han: 1, isParent: false, isTsumo: true });
+      expect(result.toAnswerString()).toBe('300/500');
+    });
+
+    test('40符1翻 親ツモ → 700 all', () => {
+      const result = calculateScore({ fu: 40, han: 1, isParent: true, isTsumo: true });
+      expect(result.toAnswerString()).toBe('700 all');
+    });
   });
 });
