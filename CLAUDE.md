@@ -23,9 +23,9 @@
 ```
 lib/domain/
 ├── hand_analyzer.dart     # 面子分解（バックトラッキング）
-├── yaku_judge.dart        # 役判定（12役）
-├── fu_calculator.dart     # 符計算
-├── score_calculator.dart  # 点数計算
+├── yaku_judge.dart        # 役判定（Mリーグ準拠 23役+役満3種）
+├── fu_calculator.dart     # 符計算（Mリーグルール: 連風牌2符）
+├── score_calculator.dart  # 点数計算（切り上げ満貫あり、数え役満なし）
 └── models/
     ├── hand.dart          # Hand, HandDecomposition, Chitoitsu/Kokushi
     ├── mentsu.dart        # Mentsu, MentsuType

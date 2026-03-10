@@ -38,12 +38,14 @@ String calculateScoreFromProblem({
   required int han,
   required bool isParent,
   required bool isTsumo,
+  bool isYakuman = false,
 }) {
   final result = calculateScore(
     fu: fu,
     han: han,
     isParent: isParent,
     isTsumo: isTsumo,
+    isYakuman: isYakuman,
   );
   return result.toAnswerString();
 }
@@ -117,6 +119,7 @@ String calculateScoreFromHand({
       han: han,
       isParent: isParent,
       isTsumo: isTsumo,
+      isYakuman: hasYakuman,
     );
 
     // 最高得点を選択 (ronPointsで比較)
@@ -137,32 +140,32 @@ void main() {
     // 全24問のfu/han → 点数（標準計算で検証）
     final directTests = [
       // 初級
-      (id: 'b1', fu: 30, han: 2, isP: false, isT: false, ans: '2000'),
-      (id: 'b2', fu: 30, han: 2, isP: false, isT: true, ans: '500/1000'),
-      (id: 'b3', fu: 30, han: 2, isP: false, isT: false, ans: '2000'),
-      (id: 'b4', fu: 20, han: 3, isP: false, isT: true, ans: '700/1300'),
-      (id: 'b5', fu: 30, han: 2, isP: true, isT: false, ans: '2900'),
-      (id: 'b6', fu: 30, han: 2, isP: false, isT: false, ans: '2000'),
-      (id: 'b7', fu: 30, han: 2, isP: false, isT: false, ans: '2000'),
-      (id: 'b8', fu: 30, han: 3, isP: false, isT: false, ans: '3900'),
+      (id: 'b1', fu: 30, han: 2, isP: false, isT: false, ym: false, ans: '2000'),
+      (id: 'b2', fu: 30, han: 2, isP: false, isT: true, ym: false, ans: '500/1000'),
+      (id: 'b3', fu: 30, han: 2, isP: false, isT: false, ym: false, ans: '2000'),
+      (id: 'b4', fu: 20, han: 3, isP: false, isT: true, ym: false, ans: '700/1300'),
+      (id: 'b5', fu: 30, han: 2, isP: true, isT: false, ym: false, ans: '2900'),
+      (id: 'b6', fu: 30, han: 2, isP: false, isT: false, ym: false, ans: '2000'),
+      (id: 'b7', fu: 30, han: 2, isP: false, isT: false, ym: false, ans: '2000'),
+      (id: 'b8', fu: 30, han: 3, isP: false, isT: false, ym: false, ans: '3900'),
       // 中級
-      (id: 'i1', fu: 30, han: 4, isP: false, isT: false, ans: '7700'),
-      (id: 'i2', fu: 30, han: 3, isP: false, isT: false, ans: '3900'),
-      (id: 'i3', fu: 30, han: 4, isP: false, isT: false, ans: '7700'),
-      (id: 'i4', fu: 20, han: 4, isP: false, isT: true, ans: '1300/2600'),
-      (id: 'i5', fu: 40, han: 4, isP: false, isT: false, ans: '8000'),
-      (id: 'i6', fu: 30, han: 4, isP: true, isT: true, ans: '3900 all'),
-      (id: 'i7', fu: 30, han: 4, isP: false, isT: true, ans: '2000/3900'),
-      (id: 'i8', fu: 25, han: 4, isP: false, isT: false, ans: '6400'),
+      (id: 'i1', fu: 30, han: 4, isP: false, isT: false, ym: false, ans: '8000'),
+      (id: 'i2', fu: 30, han: 3, isP: false, isT: false, ym: false, ans: '3900'),
+      (id: 'i3', fu: 30, han: 4, isP: false, isT: false, ym: false, ans: '8000'),
+      (id: 'i4', fu: 20, han: 4, isP: false, isT: true, ym: false, ans: '1300/2600'),
+      (id: 'i5', fu: 40, han: 4, isP: false, isT: false, ym: false, ans: '8000'),
+      (id: 'i6', fu: 30, han: 4, isP: true, isT: true, ym: false, ans: '4000 all'),
+      (id: 'i7', fu: 30, han: 4, isP: false, isT: true, ym: false, ans: '2000/4000'),
+      (id: 'i8', fu: 25, han: 4, isP: false, isT: false, ym: false, ans: '6400'),
       // 上級
-      (id: 'a1', fu: 20, han: 6, isP: false, isT: true, ans: '3000/6000'),
-      (id: 'a2', fu: 30, han: 7, isP: false, isT: true, ans: '3000/6000'),
-      (id: 'a3', fu: 20, han: 8, isP: false, isT: true, ans: '4000/8000'),
-      (id: 'a4', fu: 30, han: 10, isP: false, isT: true, ans: '4000/8000'),
-      (id: 'a5', fu: 20, han: 11, isP: false, isT: true, ans: '6000/12000'),
-      (id: 'a6', fu: 0, han: 13, isP: false, isT: false, ans: '32000'),
-      (id: 'a7', fu: 40, han: 7, isP: true, isT: false, ans: '18000'),
-      (id: 'a8', fu: 0, han: 13, isP: false, isT: true, ans: '8000/16000'),
+      (id: 'a1', fu: 20, han: 6, isP: false, isT: true, ym: false, ans: '3000/6000'),
+      (id: 'a2', fu: 30, han: 7, isP: false, isT: true, ym: false, ans: '3000/6000'),
+      (id: 'a3', fu: 20, han: 8, isP: false, isT: true, ym: false, ans: '4000/8000'),
+      (id: 'a4', fu: 30, han: 10, isP: false, isT: true, ym: false, ans: '4000/8000'),
+      (id: 'a5', fu: 20, han: 11, isP: false, isT: true, ym: false, ans: '6000/12000'),
+      (id: 'a6', fu: 0, han: 13, isP: false, isT: false, ym: true, ans: '32000'),
+      (id: 'a7', fu: 40, han: 7, isP: true, isT: false, ym: false, ans: '18000'),
+      (id: 'a8', fu: 0, han: 13, isP: false, isT: true, ym: true, ans: '8000/16000'),
     ];
 
     for (final tc in directTests) {
@@ -172,6 +175,7 @@ void main() {
           han: tc.han,
           isParent: tc.isP,
           isTsumo: tc.isT,
+          isYakuman: tc.ym,
         );
         expect(answer, tc.ans);
       });
