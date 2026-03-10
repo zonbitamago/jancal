@@ -7,7 +7,6 @@ import 'yaku_judge.dart';
 import 'fu_calculator.dart';
 import 'score_calculator.dart';
 import 'models/hand.dart';
-import 'models/mentsu.dart';
 
 /// 動的に問題を生成するエンジン
 class ProblemGenerator {

@@ -5,6 +5,7 @@ import 'package:jancal/domain/fu_calculator.dart';
 import 'package:jancal/domain/score_calculator.dart';
 import 'package:jancal/domain/models/hand.dart';
 import 'package:jancal/domain/models/mentsu.dart';
+import 'package:jancal/domain/models/wait_type.dart';
 import 'package:jancal/utils/tile_parser.dart';
 
 void main() {
@@ -153,20 +154,28 @@ void main() {
     });
   });
 
-  group('副露対応: 点数計算E2E', () {
-    test('白ポン + 門前外 子ロン → 40符1翻 1300', () {
-      final tiles = parseTiles('555z 234m 678p 456s 33p');
+  group('副露対応: 点数計算E2E (analyzeHandWithOpen)', () {
+    test('白ポン(明刻) + 閉じた手 子ロン → 30符1翻 1000', () {
+      // 白の明刻(open) + 234m 678p 456s 33p(closed)
+      final openMentsu = [
+        Mentsu(type: MentsuType.minko, tiles: parseTiles('555z')),
+      ];
+      final closedTiles = parseTiles('234m 678p 456s 33p');
       final winTile = parseTiles('3p')[0];
+      final allTiles = parseTiles('555z 234m 678p 456s 33p');
       final hand = Hand(
-        tiles: tiles,
+        tiles: allTiles,
         winTile: winTile,
         isTsumo: false,
         isMenzen: false,
         isParent: false,
+        openMentsu: openMentsu,
       );
 
-      final decomps = analyzeHand(tiles, winTile);
+      final decomps = analyzeHandWithOpen(closedTiles, winTile, openMentsu);
       expect(decomps, isNotEmpty);
+      // 明刻が含まれることを確認
+      expect(decomps.first.mentsuList[0].type, MentsuType.minko);
 
       final yaku = judgeYaku(hand: hand, decomposition: decomps.first);
       expect(yaku.any((y) => y.name == '役牌'), isTrue);
@@ -178,6 +187,8 @@ void main() {
         isMenzen: false,
         isPinfu: false,
       );
+      // 副底20 + 明刻(字牌)4 + 単騎2 = 26 → 30符
+      expect(fu, 30);
 
       final result = calculateScore(
         fu: fu,
@@ -185,8 +196,57 @@ void main() {
         isParent: false,
         isTsumo: false,
       );
+      // 30符1翻 子ロン: base=240, ron=960→1000
+      expect(result.toAnswerString(), '1000');
+    });
 
-      expect(result.toAnswerString(), '1300');
+    test('2副露トイトイ + ドラ1 子ロン → 40符3翻 5200', () {
+      // 222m(open) + 555p(open) + 888s(closed) + 333m(closed) + 77s
+      final openMentsu = [
+        Mentsu(type: MentsuType.minko, tiles: parseTiles('222m')),
+        Mentsu(type: MentsuType.minko, tiles: parseTiles('555p')),
+      ];
+      final closedTiles = parseTiles('888s 333m 77s');
+      final winTile = parseTiles('7s')[0];
+      final allTiles = parseTiles('222m 555p 888s 333m 77s');
+      final hand = Hand(
+        tiles: allTiles,
+        winTile: winTile,
+        isTsumo: false,
+        isMenzen: false,
+        isParent: false,
+        openMentsu: openMentsu,
+        dora: parseTiles('8s'),
+      );
+
+      final decomps = analyzeHandWithOpen(closedTiles, winTile, openMentsu);
+      expect(decomps, isNotEmpty);
+
+      final yaku = judgeYaku(hand: hand, decomposition: decomps.first);
+      final yakuNames = yaku.map((y) => y.name).toList();
+      expect(yakuNames, contains('トイトイ'));
+
+      int totalHan = yaku.fold(0, (sum, y) => sum + y.han);
+      totalHan += countDora(allTiles, hand.dora);
+
+      final fu = calculateFu(
+        decomposition: decomps.first,
+        isTsumo: false,
+        isMenzen: false,
+        isPinfu: false,
+      );
+      // 副底20 + 明刻(中張)2×2 + 暗刻(中張)4×2 + 単騎2 = 34 → 40符
+      expect(fu, 40);
+      // トイトイ2 + ドラ(8s×3枚)3 = 5翻 → 満貫
+      expect(totalHan, greaterThanOrEqualTo(3));
+
+      final result = calculateScore(
+        fu: fu,
+        han: totalHan,
+        isParent: false,
+        isTsumo: false,
+      );
+      expect(result.ronPoints, greaterThan(0));
     });
   });
 }

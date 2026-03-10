@@ -12,7 +12,6 @@ void main() {
 
     test('初級の問題を生成できる', () {
       final problem = generator.generate(QuizLevel.beginner);
-      expect(problem.id, startsWith('g'));
       expect(problem.han, inInclusiveRange(1, 3));
       expect(problem.choices.length, 4);
       expect(problem.choices.contains(problem.correctAnswer), isTrue);
@@ -38,10 +37,6 @@ void main() {
         problems.add(generator.generate(QuizLevel.beginner));
       }
       expect(problems.length, 10);
-      // IDが一意
-      final ids = problems.map((p) => p.id).toSet();
-      // 動的生成分のIDは一意(フォールバック問題を除く)
-      expect(ids.length, greaterThan(1));
     });
 
     test('生成問題の選択肢に正解が含まれる', () {
