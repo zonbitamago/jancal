@@ -4,11 +4,13 @@ import '../models/problem.dart';
 class HomeScreen extends StatelessWidget {
   final Map<QuizLevel, int> correctCounts;
   final Map<QuizLevel, int> totalCounts;
+  final VoidCallback? onResetStats;
 
   const HomeScreen({
     super.key,
     required this.correctCounts,
     required this.totalCounts,
+    this.onResetStats,
   });
 
   @override
@@ -44,7 +46,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 40),
                   if (totalAnswered > 0) ...[
-                    _buildStats(totalCorrect, totalAnswered, rate),
+                    _buildStats(context, totalCorrect, totalAnswered, rate),
                     const SizedBox(height: 32),
                   ],
                   _buildLevelButton(
@@ -99,7 +101,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStats(int correct, int total, double rate) {
+  Widget _buildStats(BuildContext context, int correct, int total, double rate) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -109,9 +111,43 @@ class HomeScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(
-            'セッション正答率: $correct / $total (${(rate * 100).toStringAsFixed(0)}%)',
-            style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '通算正答率: $correct / $total (${(rate * 100).toStringAsFixed(0)}%)',
+                style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 14),
+              ),
+              if (onResetStats != null) ...[
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        backgroundColor: const Color(0xFF1A2332),
+                        title: const Text('リセット確認', style: TextStyle(color: Colors.white)),
+                        content: const Text('統計データをリセットしますか？', style: TextStyle(color: Colors.white70)),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: const Text('キャンセル'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              onResetStats!();
+                              Navigator.of(ctx).pop();
+                            },
+                            child: const Text('リセット', style: TextStyle(color: Color(0xFFFC8181))),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  child: Icon(Icons.refresh, color: Colors.white.withOpacity(0.4), size: 16),
+                ),
+              ],
+            ],
           ),
           const SizedBox(height: 8),
           ClipRRect(

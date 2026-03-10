@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'models/problem.dart';
 import 'screens/home_screen.dart';
 import 'screens/quiz_screen.dart';
+import 'services/stats_service.dart';
 
 void main() {
   runApp(const JanCalApp());
@@ -15,16 +16,23 @@ class JanCalApp extends StatefulWidget {
 }
 
 class _JanCalAppState extends State<JanCalApp> {
-  final Map<QuizLevel, int> _correctCounts = {};
-  final Map<QuizLevel, int> _totalCounts = {};
+  final StatsService _statsService = StatsService();
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initStats();
+  }
+
+  Future<void> _initStats() async {
+    await _statsService.init();
+    setState(() => _initialized = true);
+  }
 
   void _onAnswer(QuizLevel level, bool isCorrect) {
-    setState(() {
-      _totalCounts[level] = (_totalCounts[level] ?? 0) + 1;
-      if (isCorrect) {
-        _correctCounts[level] = (_correctCounts[level] ?? 0) + 1;
-      }
-    });
+    _statsService.recordAnswer(level, isCorrect);
+    setState(() {});
   }
 
   @override
@@ -38,10 +46,18 @@ class _JanCalAppState extends State<JanCalApp> {
         fontFamily: 'NotoSansJP',
         useMaterial3: true,
       ),
-      home: HomeScreen(
-        correctCounts: _correctCounts,
-        totalCounts: _totalCounts,
-      ),
+      home: _initialized
+          ? HomeScreen(
+              correctCounts: _statsService.getAllCorrectCounts(),
+              totalCounts: _statsService.getAllTotalCounts(),
+              onResetStats: () async {
+                await _statsService.resetStats();
+                setState(() {});
+              },
+            )
+          : const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            ),
       onGenerateRoute: (settings) {
         if (settings.name == '/quiz') {
           final level = settings.arguments as QuizLevel;

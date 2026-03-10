@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/problem.dart';
+import '../domain/problem_generator.dart';
 import '../widgets/tile_group.dart';
 import '../widgets/badge.dart';
 
@@ -19,6 +20,7 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> {
   late List<Problem> _problems;
+  final ProblemGenerator _generator = ProblemGenerator();
   int _currentIndex = 0;
   String? _selectedAnswer;
   bool _showHint = false;
@@ -29,6 +31,16 @@ class _QuizScreenState extends State<QuizScreen> {
   void initState() {
     super.initState();
     _problems = getProblemsForLevel(widget.level)..shuffle();
+    // 動的問題を追加
+    _appendGeneratedProblems();
+  }
+
+  void _appendGeneratedProblems() {
+    for (int i = 0; i < 5; i++) {
+      final p = _generator.generate(widget.level);
+      _problems.add(p);
+    }
+    _problems.shuffle();
   }
 
   Problem get _currentProblem => _problems[_currentIndex % _problems.length];
@@ -53,6 +65,9 @@ class _QuizScreenState extends State<QuizScreen> {
       _selectedAnswer = null;
       _showHint = false;
       if (_currentIndex % _problems.length == 0) {
+        // 次の周回時に新しい動的問題を生成
+        _problems = getProblemsForLevel(widget.level);
+        _appendGeneratedProblems();
         _problems.shuffle();
       }
     });
@@ -164,6 +179,7 @@ class _QuizScreenState extends State<QuizScreen> {
             tilesNotation: problem.tiles,
             winTile: problem.winTile,
             dora: problem.dora,
+            openGroups: problem.openGroups,
           ),
           const SizedBox(height: 12),
           Row(
@@ -205,6 +221,12 @@ class _QuizScreenState extends State<QuizScreen> {
       runSpacing: 8,
       alignment: WrapAlignment.center,
       children: [
+        if (problem.isOpen)
+          InfoBadge(
+            label: '副露',
+            color: const Color(0xFFFF9800).withOpacity(0.2),
+            textColor: const Color(0xFFFF9800),
+          ),
         InfoBadge(
           label: problem.isParent ? '親' : '子',
           color: problem.isParent

@@ -21,6 +21,51 @@ List<HandDecomposition> analyzeHand(List<Tile> tiles, Tile winTile) {
   return results;
 }
 
+/// 副露ありの面子分解
+/// openMentsu: 既に確定した副露面子（ポン・チー・明槓）
+/// closedTiles: 手牌のうち副露以外の閉じた牌（雀頭+残り面子分）
+List<HandDecomposition> analyzeHandWithOpen(
+    List<Tile> closedTiles, Tile winTile, List<Mentsu> openMentsu) {
+  final results = <HandDecomposition>[];
+  final neededMentsu = 4 - openMentsu.length;
+
+  if (neededMentsu < 0) return results;
+
+  final sorted = List<Tile>.from(closedTiles)..sort(_compareTiles);
+  final counts = <String, int>{};
+  for (final t in sorted) {
+    counts[t.key] = (counts[t.key] ?? 0) + 1;
+  }
+
+  final triedJantai = <String>{};
+  for (final tile in sorted) {
+    if (triedJantai.contains(tile.key)) continue;
+    if ((counts[tile.key] ?? 0) < 2) continue;
+    triedJantai.add(tile.key);
+
+    final remaining = Map<String, int>.from(counts);
+    remaining[tile.key] = remaining[tile.key]! - 2;
+
+    final closedMentsuList = <Mentsu>[];
+    if (neededMentsu == 0
+        ? remaining.values.every((v) => v == 0)
+        : _extractMentsu(remaining, sorted, closedMentsuList)) {
+      if (closedMentsuList.length == neededMentsu) {
+        final allMentsu = [...openMentsu, ...closedMentsuList];
+        final waitType =
+            _determineWaitType(allMentsu, [tile, tile], winTile);
+        results.add(HandDecomposition(
+          mentsuList: allMentsu,
+          jantai: [tile, tile],
+          waitType: waitType,
+        ));
+      }
+    }
+  }
+
+  return results;
+}
+
 void _findDecompositions(
     List<Tile> tiles, Tile winTile, List<HandDecomposition> results) {
   final sorted = List<Tile>.from(tiles)..sort(_compareTiles);

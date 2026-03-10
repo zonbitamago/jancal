@@ -6,12 +6,14 @@ class TileGroupWidget extends StatelessWidget {
   final String tilesNotation;
   final String winTile;
   final List<String> dora;
+  final List<int> openGroups;
 
   const TileGroupWidget({
     super.key,
     required this.tilesNotation,
     required this.winTile,
     this.dora = const [],
+    this.openGroups = const [],
   });
 
   @override
@@ -33,20 +35,51 @@ class TileGroupWidget extends StatelessWidget {
         children: [
           for (int gi = 0; gi < groups.length; gi++) ...[
             if (gi > 0) const SizedBox(width: 6),
-            ...groups[gi].tiles.map((tile) {
-              final isWin = winTiles.isNotEmpty && tile.key == winTiles.first.key;
-              final isDora = doraTiles.contains(tile.key);
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 1),
-                child: TileWidget(
-                  tile: tile,
-                  isWinTile: isWin,
-                  isDora: isDora,
-                ),
-              );
-            }),
+            if (openGroups.contains(gi))
+              _buildOpenGroup(groups[gi], winTiles, doraTiles)
+            else
+              ...groups[gi].tiles.map((tile) {
+                final isWin = winTiles.isNotEmpty && tile.key == winTiles.first.key;
+                final isDora = doraTiles.contains(tile.key);
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 1),
+                  child: TileWidget(
+                    tile: tile,
+                    isWinTile: isWin,
+                    isDora: isDora,
+                  ),
+                );
+              }),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildOpenGroup(
+      parser.TileGroup group, List<parser.Tile> winTiles, Set<String> doraTiles) {
+    return Container(
+      padding: const EdgeInsets.only(bottom: 2),
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: Color(0xFFFF9800), width: 2),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: group.tiles.map((tile) {
+          final isWin =
+              winTiles.isNotEmpty && tile.key == winTiles.first.key;
+          final isDora = doraTiles.contains(tile.key);
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 1),
+            child: TileWidget(
+              tile: tile,
+              isWinTile: isWin,
+              isDora: isDora,
+            ),
+          );
+        }).toList(),
       ),
     );
   }
