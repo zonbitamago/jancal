@@ -28,12 +28,27 @@ void main() {
 
     // TDDサイクル 1-4: 満貫以上
     group('満貫以上', () {
-      test('30符4翻 子ロン → 7700 (切り上げ満貫なし)', () {
+      test('30符4翻 子ロン → 8000 (切り上げ満貫)', () {
         final result = calculateScore(fu: 30, han: 4, isParent: false, isTsumo: false);
-        expect(result.toAnswerString(), '7700');
+        expect(result.toAnswerString(), '8000');
       });
 
-      test('25符4翻 子ロン → 6400 (切り上げ満貫ではない)', () {
+      test('60符3翻 子ロン → 8000 (切り上げ満貫)', () {
+        final result = calculateScore(fu: 60, han: 3, isParent: false, isTsumo: false);
+        expect(result.toAnswerString(), '8000');
+      });
+
+      test('30符4翻 親ロン → 12000 (切り上げ満貫)', () {
+        final result = calculateScore(fu: 30, han: 4, isParent: true, isTsumo: false);
+        expect(result.toAnswerString(), '12000');
+      });
+
+      test('30符4翻 子ツモ → 2000/4000 (切り上げ満貫)', () {
+        final result = calculateScore(fu: 30, han: 4, isParent: false, isTsumo: true);
+        expect(result.toAnswerString(), '2000/4000');
+      });
+
+      test('25符4翻 子ロン → 6400 (切り上げ満貫の対象外)', () {
         final result = calculateScore(fu: 25, han: 4, isParent: false, isTsumo: false);
         expect(result.toAnswerString(), '6400');
       });
@@ -73,9 +88,9 @@ void main() {
         expect(result.toAnswerString(), '24000');
       });
 
-      test('13翻 子ロン → 32000 (役満)', () {
+      test('13翻 子ロン → 24000 (数え役満なし=三倍満)', () {
         final result = calculateScore(fu: 30, han: 13, isParent: false, isTsumo: false);
-        expect(result.toAnswerString(), '32000');
+        expect(result.toAnswerString(), '24000');
       });
     });
 
@@ -112,12 +127,12 @@ void main() {
       });
 
       test('役満 子ロン → 32000', () {
-        final result = calculateScore(fu: 0, han: 13, isParent: false, isTsumo: false);
+        final result = calculateScore(fu: 0, han: 13, isParent: false, isTsumo: false, isYakuman: true);
         expect(result.toAnswerString(), '32000');
       });
 
       test('役満 子ツモ → 8000/16000', () {
-        final result = calculateScore(fu: 0, han: 13, isParent: false, isTsumo: true);
+        final result = calculateScore(fu: 0, han: 13, isParent: false, isTsumo: true, isYakuman: true);
         expect(result.toAnswerString(), '8000/16000');
       });
     });

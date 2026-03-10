@@ -239,6 +239,37 @@ void main() {
       );
     });
 
+    // Mリーグルール: 連風牌の雀頭は2符（4符ではない）
+    test('連風牌雀頭(東場の東家で東の雀頭) → 2符(4符ではない)', () {
+      final east = _t(1, TileType.wind);
+      final decomp = HandDecomposition(
+        mentsuList: [
+          _anko(5, TileType.man),       // 暗刻(中張) = 4符
+          _shuntsu(4, TileType.pin),
+          _shuntsu(7, TileType.sou),
+          _shuntsu(2, TileType.man),
+        ],
+        jantai: [east, east],
+        waitType: WaitType.kanchan,     // 嵌張 = 2符
+      );
+      // 2符の場合: 副底20 + 門前ロン10 + 暗刻4 + 嵌張2 + 雀頭2 = 38 → 40
+      // 4符の場合: 副底20 + 門前ロン10 + 暗刻4 + 嵌張2 + 雀頭4 = 40 → 40
+      // 切り上げ後は同じ...ツモにして境界をまたがせる
+      // ツモ2符の場合: 20 + 暗刻4 + 嵌張2 + 雀頭2 + ツモ2 = 30 → 30
+      // ツモ4符の場合: 20 + 暗刻4 + 嵌張2 + 雀頭4 + ツモ2 = 32 → 40
+      expect(
+        calculateFu(
+          decomposition: decomp,
+          isTsumo: true,
+          isMenzen: true,
+          isPinfu: false,
+          seatWind: east,
+          roundWind: east,
+        ),
+        30, // 連風牌2符なら30符、4符なら40符になる
+      );
+    });
+
     test('食い仕掛けロン → 門前加符なし', () {
       final decomp = HandDecomposition(
         mentsuList: [

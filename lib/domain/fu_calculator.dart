@@ -54,12 +54,11 @@ int _jantaiFu(List<Tile> jantai, Tile? seatWind, Tile? roundWind) {
   // 三元牌（白=5, 發=6, 中=7）
   if (tile.type == TileType.dragon) return 2;
 
-  // 場風・自風
+  // 場風・自風（Mリーグルール: 連風牌でも2符）
   if (tile.type == TileType.wind) {
-    int fu = 0;
-    if (seatWind != null && tile == seatWind) fu += 2;
-    if (roundWind != null && tile == roundWind) fu += 2;
-    return fu;
+    if (seatWind != null && tile == seatWind) return 2;
+    if (roundWind != null && tile == roundWind) return 2;
+    return 0;
   }
 
   return 0;
