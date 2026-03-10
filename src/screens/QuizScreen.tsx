@@ -10,7 +10,10 @@ import { recordAnswer, getStats } from '../services/statsService';
 export const QuizScreen: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const level: QuizLevel = (location.state as any)?.level ?? QuizLevel.beginner;
+  const rawLevel = (location.state as Record<string, unknown> | null)?.level;
+  const level: QuizLevel = Object.values(QuizLevel).includes(rawLevel as QuizLevel)
+    ? (rawLevel as QuizLevel)
+    : QuizLevel.beginner;
 
   const [problem, setProblem] = useState<Problem | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
@@ -24,7 +27,7 @@ export const QuizScreen: React.FC = () => {
     setProblem(p);
     setSelected(null);
     setShowHint(false);
-  }, [generator]);
+  }, [generator, level]);
 
   useEffect(() => {
     const s = getStats(level);
@@ -154,7 +157,7 @@ export const QuizScreen: React.FC = () => {
                 transition: 'all 0.3s',
               }}
             >
-              {choice}点
+              {choice.includes('all') ? choice.replace('all', 'オール') : `${choice}点`}
             </button>
           );
         })}
@@ -172,7 +175,7 @@ export const QuizScreen: React.FC = () => {
             fontSize: 18, fontWeight: 700,
             color: isCorrect ? '#48BB78' : '#FC8181',
           }}>
-            {isCorrect ? '✓ 正解！' : `✗ 不正解（正解: ${problem.correctAnswer}点）`}
+            {isCorrect ? '✓ 正解！' : `✗ 不正解（正解: ${problem.correctAnswer.includes('all') ? problem.correctAnswer.replace('all', 'オール') : problem.correctAnswer + '点'}）`}
           </span>
           {problem.hint && (
             <p style={{ color: '#aaa', fontSize: 12, margin: '8px 0 0' }}>{problem.hint}</p>

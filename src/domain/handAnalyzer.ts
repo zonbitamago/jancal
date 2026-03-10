@@ -44,16 +44,21 @@ export function analyzeHandWithOpen(
     const remaining = new Map(counts);
     remaining.set(tile.key, remaining.get(tile.key)! - 2);
 
-    const closedMentsuList: Mentsu[] = [];
     const allZero = [...remaining.values()].every(v => v === 0);
 
-    if (neededMentsu === 0
-      ? allZero
-      : extractMentsu(remaining, sorted, closedMentsuList)) {
-      if (closedMentsuList.length === neededMentsu) {
-        const allMentsu = [...openMentsu, ...closedMentsuList];
-        const waitType = determineWaitType(allMentsu, [tile, tile], winTile);
-        results.push(new HandDecomposition(allMentsu, [tile, tile], waitType));
+    if (neededMentsu === 0 && allZero) {
+      const allMentsu = [...openMentsu];
+      const waitType = determineWaitType(allMentsu, [tile, tile], winTile);
+      results.push(new HandDecomposition(allMentsu, [tile, tile], waitType));
+    } else if (neededMentsu > 0) {
+      const allMentsuResults: Mentsu[][] = [];
+      extractAllMentsu(remaining, sorted, [], allMentsuResults);
+      for (const closedMentsuList of allMentsuResults) {
+        if (closedMentsuList.length === neededMentsu) {
+          const allMentsu = [...openMentsu, ...closedMentsuList];
+          const waitType = determineWaitType(allMentsu, [tile, tile], winTile);
+          results.push(new HandDecomposition(allMentsu, [tile, tile], waitType));
+        }
       }
     }
   }
@@ -80,18 +85,22 @@ function findDecompositions(
     const remaining = new Map(counts);
     remaining.set(tile.key, remaining.get(tile.key)! - 2);
 
-    const mentsuList: Mentsu[] = [];
-    if (extractMentsu(remaining, sorted, mentsuList)) {
+    const allMentsuResults: Mentsu[][] = [];
+    extractAllMentsu(remaining, sorted, [], allMentsuResults);
+    for (const mentsuList of allMentsuResults) {
       const waitType = determineWaitType(mentsuList, [tile, tile], winTile);
       results.push(new HandDecomposition([...mentsuList], [tile, tile], waitType));
     }
   }
 }
 
-function extractMentsu(
-  counts: Map<string, number>, allTiles: Tile[], result: Mentsu[]
-): boolean {
-  if ([...counts.values()].every(v => v === 0)) return true;
+function extractAllMentsu(
+  counts: Map<string, number>, allTiles: Tile[], current: Mentsu[], results: Mentsu[][]
+): void {
+  if ([...counts.values()].every(v => v === 0)) {
+    results.push([...current]);
+    return;
+  }
 
   let firstKey: string | null = null;
   let firstTile: Tile | null = null;
@@ -102,14 +111,14 @@ function extractMentsu(
       break;
     }
   }
-  if (!firstKey || !firstTile) return false;
+  if (!firstKey || !firstTile) return;
 
   // 刻子を試す
   if ((counts.get(firstKey) ?? 0) >= 3) {
     counts.set(firstKey, counts.get(firstKey)! - 3);
-    result.push(new Mentsu(MentsuType.anko, [firstTile, firstTile, firstTile]));
-    if (extractMentsu(counts, allTiles, result)) return true;
-    result.pop();
+    current.push(new Mentsu(MentsuType.anko, [firstTile, firstTile, firstTile]));
+    extractAllMentsu(counts, allTiles, current, results);
+    current.pop();
     counts.set(firstKey, counts.get(firstKey)! + 3);
   }
 
@@ -130,16 +139,27 @@ function extractMentsu(
         const tile2 = findTile(allTiles, key2)!;
         const tile3 = findTile(allTiles, key3)!;
 
-        result.push(new Mentsu(MentsuType.shuntsu, [firstTile, tile2, tile3]));
-        if (extractMentsu(counts, allTiles, result)) return true;
-        result.pop();
+        current.push(new Mentsu(MentsuType.shuntsu, [firstTile, tile2, tile3]));
+        extractAllMentsu(counts, allTiles, current, results);
+        current.pop();
         counts.set(firstKey, counts.get(firstKey)! + 1);
         counts.set(key2, counts.get(key2)! + 1);
         counts.set(key3, counts.get(key3)! + 1);
       }
     }
   }
+}
 
+// 後方互換: 最初の1つが見つかればtrue
+function extractMentsu(
+  counts: Map<string, number>, allTiles: Tile[], result: Mentsu[]
+): boolean {
+  const allResults: Mentsu[][] = [];
+  extractAllMentsu(counts, allTiles, [], allResults);
+  if (allResults.length > 0) {
+    result.push(...allResults[0]);
+    return true;
+  }
   return false;
 }
 
@@ -199,11 +219,14 @@ function checkChitoitsu(tiles: Tile[]): ChitoitsuDecomposition | null {
   if (![...counts.values()].every(v => v === 2)) return null;
 
   const pairs: Tile[][] = [];
-  const seen = new Set<string>();
+  const pairMap = new Map<string, Tile[]>();
   for (const t of tiles) {
-    if (!seen.has(t.key)) {
-      seen.add(t.key);
-      pairs.push([t, t]);
+    const existing = pairMap.get(t.key);
+    if (!existing) {
+      pairMap.set(t.key, [t]);
+    } else if (existing.length === 1) {
+      existing.push(t);
+      pairs.push(existing);
     }
   }
 

@@ -1,10 +1,11 @@
 import { Problem, QuizLevel, getProblemsForLevel } from '../models/problem';
-import { parseTiles, Tile, TileType } from '../utils/tileParser';
-import { analyzeHand } from './handAnalyzer';
+import { parseTiles, parseTileGroups, Tile, TileType } from '../utils/tileParser';
+import { analyzeHand, analyzeHandWithOpen } from './handAnalyzer';
 import { judgeYaku, countDora } from './yakuJudge';
 import { calculateFu } from './fuCalculator';
 import { calculateScore } from './scoreCalculator';
 import { createHand } from './models/hand';
+import { Mentsu, MentsuType } from './models/mentsu';
 
 // シンプルな擬似乱数生成器（seed対応）
 class SeededRandom {
@@ -94,9 +95,15 @@ export class ProblemGenerator {
     const suits = [TileType.man, TileType.pin, TileType.sou];
     const shuntsuList: { start: number; suitIdx: number }[] = [];
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 3; i++) {
       const suitIdx = this.random.nextInt(3);
       const start = this.random.nextInt(7) + 1;
+      shuntsuList.push({ start, suitIdx });
+    }
+    // 最後の順子は両面待ち可能な範囲（2-6始まり）にする
+    {
+      const suitIdx = this.random.nextInt(3);
+      const start = this.random.nextInt(5) + 2; // 2-6
       shuntsuList.push({ start, suitIdx });
     }
 
@@ -106,16 +113,10 @@ export class ProblemGenerator {
     const lastS = shuntsuList[shuntsuList.length - 1];
     const lastStart = lastS.start;
     const lastSuit = suits[lastS.suitIdx];
-    let winTileStr: string;
-    if (lastStart >= 2 && lastStart <= 6) {
-      winTileStr = this.random.nextBool()
-        ? `${lastStart}${suitChar(lastSuit)}`
-        : `${lastStart + 2}${suitChar(lastSuit)}`;
-    } else if (lastStart === 1) {
-      winTileStr = `${lastStart + 2}${suitChar(lastSuit)}`;
-    } else {
-      winTileStr = `${lastStart}${suitChar(lastSuit)}`;
-    }
+    // lastStartは2-6なので常に両面待ちが可能
+    const winTileStr = this.random.nextBool()
+      ? `${lastStart}${suitChar(lastSuit)}`
+      : `${lastStart + 2}${suitChar(lastSuit)}`;
 
     const groups: string[] = [];
     for (const s of shuntsuList) {
@@ -427,7 +428,33 @@ export class ProblemGenerator {
         tiles, winTile, isTsumo, isMenzen, isParent, isRiichi, isIppatsu, dora,
       });
 
-      const decompositions = analyzeHand(tiles, winTile);
+      let decompositions;
+      if (openGroups.length > 0) {
+        // 副露手: openGroupsのインデックスに対応するグループをMentsuに変換
+        const tileGroups = parseTileGroups(tilesStr);
+        const openMentsuList: Mentsu[] = [];
+        const closedTiles: Tile[] = [];
+        for (let gi = 0; gi < tileGroups.length; gi++) {
+          const groupTiles = tileGroups[gi].tiles;
+          if (openGroups.includes(gi)) {
+            // 副露面子の種類を判定
+            let mentsuType: MentsuType;
+            if (groupTiles.length === 3 && groupTiles[0].equals(groupTiles[1])) {
+              mentsuType = MentsuType.minko;
+            } else if (groupTiles.length === 4 && groupTiles[0].equals(groupTiles[1])) {
+              mentsuType = MentsuType.minkan;
+            } else {
+              mentsuType = MentsuType.shuntsu;
+            }
+            openMentsuList.push(new Mentsu(mentsuType, groupTiles));
+          } else {
+            closedTiles.push(...groupTiles);
+          }
+        }
+        decompositions = analyzeHandWithOpen(closedTiles, winTile, openMentsuList);
+      } else {
+        decompositions = analyzeHand(tiles, winTile);
+      }
       if (decompositions.length === 0) return null;
 
       let bestAnswer: string | null = null;

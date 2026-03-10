@@ -13,10 +13,8 @@ export function calculateScore(params: {
 
   if (isYakuman) {
     basePoints = 8000; // 役満
-  } else if (han >= 13) {
-    basePoints = 6000; // 三倍満（数え役満なし）
   } else if (han >= 11) {
-    basePoints = 6000; // 三倍満
+    basePoints = 6000; // 三倍満（数え役満なし: 13翻以上も三倍満扱い）
   } else if (han >= 8) {
     basePoints = 4000; // 倍満
   } else if (han >= 6) {

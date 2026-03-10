@@ -12,6 +12,8 @@ interface TileGroupWidgetProps {
 export const TileGroupWidget: React.FC<TileGroupWidgetProps> = ({
   groups, winTile, doraTiles = [], openGroupIndices = [],
 }) => {
+  let winTileMarked = false;
+
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'flex-end' }}>
       {groups.map((group, gi) => {
@@ -22,14 +24,21 @@ export const TileGroupWidget: React.FC<TileGroupWidgetProps> = ({
             borderBottom: isOpen ? '2px solid #FF9800' : 'none',
             paddingBottom: isOpen ? 2 : 0,
           }}>
-            {group.tiles.map((tile, ti) => (
-              <TileWidget
-                key={ti}
-                tile={tile}
-                isWinTile={winTile !== undefined && tile.key === winTile.key && tile.number === winTile.number && tile.type === winTile.type}
-                isDora={doraTiles.some(d => d.key === tile.key)}
-              />
-            ))}
+            {group.tiles.map((tile, ti) => {
+              let isWin = false;
+              if (!winTileMarked && winTile && tile.equals(winTile)) {
+                isWin = true;
+                winTileMarked = true;
+              }
+              return (
+                <TileWidget
+                  key={ti}
+                  tile={tile}
+                  isWinTile={isWin}
+                  isDora={doraTiles.some(d => d.key === tile.key)}
+                />
+              );
+            })}
           </div>
         );
       })}

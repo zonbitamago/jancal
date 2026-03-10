@@ -35,6 +35,7 @@ export class Tile {
       case TileType.sou: return 's';
       case TileType.wind:
       case TileType.dragon: return 'z';
+      default: throw new Error(`Unknown tile type: ${this.type}`);
     }
   }
 
@@ -45,6 +46,7 @@ export class Tile {
       case TileType.sou: return `${this.number}索`;
       case TileType.wind: return WIND_CHARS[this.number];
       case TileType.dragon: return DRAGON_CHARS[this.number];
+      default: throw new Error(`Unknown tile type: ${this.type}`);
     }
   }
 
@@ -92,6 +94,7 @@ function parsePart(part: string): Tile[] {
 
   for (const ch of numbers.split('')) {
     const num = parseInt(ch, 10);
+    if (isNaN(num)) throw new Error(`Invalid tile number: '${ch}' in '${part}'`);
     tiles.push(createTile(num, suffix));
   }
 

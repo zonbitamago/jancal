@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QuizLevel } from '../models/problem';
 import { getStats, getTotalStats, resetStats, LevelStats } from '../services/statsService';
@@ -14,16 +14,16 @@ export const HomeScreen: React.FC = () => {
   const [total, setTotal] = useState<LevelStats>({ correct: 0, total: 0 });
   const [levelStats, setLevelStats] = useState<Record<string, LevelStats>>({});
 
-  const refresh = () => {
+  const refresh = useCallback(() => {
     setTotal(getTotalStats());
     const ls: Record<string, LevelStats> = {};
     for (const lc of levelConfig) {
       ls[lc.level] = getStats(lc.level);
     }
     setLevelStats(ls);
-  };
+  }, []);
 
-  useEffect(refresh, []);
+  useEffect(refresh, [refresh]);
 
   const pct = total.total > 0 ? Math.round((total.correct / total.total) * 100) : 0;
   const barColor = pct >= 80 ? '#48BB78' : pct >= 50 ? '#ECC94B' : '#FC8181';

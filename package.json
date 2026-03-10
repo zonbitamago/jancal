@@ -1,13 +1,8 @@
 {
   "name": "jancal",
   "version": "1.0.0",
-  "description": "麻雀の点数計算をクイズ形式で練習するFlutterアプリ。",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs",
-    "lib": "lib",
-    "test": "test"
-  },
+  "description": "麻雀の点数計算をクイズ形式で練習するWebアプリ。",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -31,7 +26,6 @@
     "@testing-library/react": "^16.3.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^5.1.4",
     "jsdom": "^28.1.0",
     "typescript": "^5.9.3",

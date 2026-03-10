@@ -7,6 +7,8 @@
 body {
   font-family: 'Noto Sans JP', sans-serif;
   background: linear-gradient(180deg, #0C1222 0%, #162032 50%, #0D2847 100%);
+  background-color: #0C1222;
+  background-attachment: fixed;
   min-height: 100vh;
   color: #fff;
   -webkit-font-smoothing: antialiased;

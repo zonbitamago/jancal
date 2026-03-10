@@ -16,7 +16,11 @@ function getAll(): Record<string, LevelStats> {
 }
 
 function saveAll(data: Record<string, LevelStats>) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // QuotaExceededError等 — 書き込み失敗は無視
+  }
 }
 
 export function getStats(level: string): LevelStats {
