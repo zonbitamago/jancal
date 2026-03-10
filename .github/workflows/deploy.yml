@@ -20,17 +20,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+      - uses: actions/setup-node@v4
         with:
-          channel: stable
+          node-version: 20
+          cache: npm
 
-      - run: flutter pub get
+      - run: npm ci
 
-      - run: flutter build web --release --base-href "/jancal/"
+      - run: npm run build
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: build/web
+          path: dist
 
   deploy:
     needs: build
