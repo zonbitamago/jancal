@@ -22,6 +22,7 @@ export enum QuizLevel {
   beginner = 'beginner',
   intermediate = 'intermediate',
   advanced = 'advanced',
+  fuPractice = 'fuPractice',
 }
 
 export function quizLevelLabel(level: QuizLevel): string {
@@ -29,6 +30,7 @@ export function quizLevelLabel(level: QuizLevel): string {
     case QuizLevel.beginner: return '初級';
     case QuizLevel.intermediate: return '中級';
     case QuizLevel.advanced: return '上級';
+    case QuizLevel.fuPractice: return '符計算';
   }
 }
 
@@ -37,6 +39,7 @@ export function quizLevelPrefix(level: QuizLevel): string {
     case QuizLevel.beginner: return 'b';
     case QuizLevel.intermediate: return 'i';
     case QuizLevel.advanced: return 'a';
+    case QuizLevel.fuPractice: return 'f';
   }
 }
 
