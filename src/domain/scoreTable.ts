@@ -3,11 +3,12 @@ import { calculateScore } from './scoreCalculator';
 export interface ScoreTableEntry {
   fu: number;
   han: number;
-  koRon: number;
-  koTsumo: string;
-  oyaRon: number;
-  oyaTsumo: string;
+  koRon: number | null;
+  koTsumo: string | null;
+  oyaRon: number | null;
+  oyaTsumo: string | null;
   label?: string;
+  note?: string;
 }
 
 export function generateScoreTable(): ScoreTableEntry[] {
@@ -23,26 +24,23 @@ export function generateScoreTable(): ScoreTableEntry[] {
       if (fu === 20 && han === 1) continue;
       // 25符1翻は存在しない（七対子は25符だが最低2翻）
       if (fu === 25 && han === 1) continue;
-      // 25符はツモなし（七対子のロンのみ）— ただし点数は計算可能
-      // 高い符×翻で満貫超えるケースはスキップ
-      const basePoints = fu * (1 << (han + 2));
-      if (basePoints > 2000 && !((han === 4 && fu >= 30) || (han === 3 && fu >= 60))) {
-        // 既に満貫を超えているが切り上げ満貫でもない → 満貫扱い
-        // これは満貫セクションでカバーするのでスキップしない、満貫として出す
-      }
 
-      const koRon = calculateScore({ fu, han, isParent: false, isTsumo: false });
+      // 20符はピンフツモ専用（ロンは30符になるため20符ロンは存在しない）
+      const hasRon = fu !== 20;
+
+      const koRon = hasRon ? calculateScore({ fu, han, isParent: false, isTsumo: false }) : null;
       const koTsumo = calculateScore({ fu, han, isParent: false, isTsumo: true });
-      const oyaRon = calculateScore({ fu, han, isParent: true, isTsumo: false });
+      const oyaRon = hasRon ? calculateScore({ fu, han, isParent: true, isTsumo: false }) : null;
       const oyaTsumo = calculateScore({ fu, han, isParent: true, isTsumo: true });
 
       entries.push({
         fu,
         han,
-        koRon: koRon.ronPoints,
+        koRon: koRon?.ronPoints ?? null,
         koTsumo: koTsumo.toAnswerString(),
-        oyaRon: oyaRon.ronPoints,
+        oyaRon: oyaRon?.ronPoints ?? null,
         oyaTsumo: oyaTsumo.toAnswerString(),
+        note: fu === 20 ? 'ピンフツモ' : fu === 25 ? '七対子' : undefined,
       });
     }
   }

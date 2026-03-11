@@ -76,20 +76,31 @@ export const ScoreTableScreen: React.FC = () => {
                 <span style={{ color: '#888', fontSize: 12, textAlign: 'right' }}>ツモ</span>
               </div>
               {/* 行 */}
-              {entries.map(entry => (
-                <div key={`${entry.fu}-${entry.han}`} style={{
-                  display: 'grid', gridTemplateColumns: '50px 1fr 1fr',
-                  padding: '8px 12px', borderTop: '1px solid rgba(255,255,255,0.05)',
-                }}>
-                  <span style={{ color: '#aaa', fontSize: 13 }}>{entry.fu}</span>
-                  <span style={{ color: '#fff', fontSize: 13, textAlign: 'right', fontWeight: 600 }}>
-                    {formatPoints(playerType === 'ko' ? entry.koRon : entry.oyaRon)}
-                  </span>
-                  <span style={{ color: '#fff', fontSize: 13, textAlign: 'right', fontWeight: 600 }}>
-                    {playerType === 'ko' ? entry.koTsumo : entry.oyaTsumo}
-                  </span>
-                </div>
-              ))}
+              {entries.map(entry => {
+                const ron = playerType === 'ko' ? entry.koRon : entry.oyaRon;
+                const tsumo = playerType === 'ko' ? entry.koTsumo : entry.oyaTsumo;
+                return (
+                  <div key={`${entry.fu}-${entry.han}`} style={{
+                    display: 'grid', gridTemplateColumns: '50px 1fr 1fr',
+                    padding: '8px 12px', borderTop: '1px solid rgba(255,255,255,0.05)',
+                  }}>
+                    <span style={{ color: '#aaa', fontSize: 13 }}>
+                      {entry.fu}
+                      {entry.note && (
+                        <span style={{ color: '#68D391', fontSize: 10, display: 'block', lineHeight: 1.2 }}>
+                          {entry.note}
+                        </span>
+                      )}
+                    </span>
+                    <span style={{ color: ron != null ? '#fff' : '#555', fontSize: 13, textAlign: 'right', fontWeight: 600 }}>
+                      {ron != null ? formatPoints(ron) : '—'}
+                    </span>
+                    <span style={{ color: tsumo != null ? '#fff' : '#555', fontSize: 13, textAlign: 'right', fontWeight: 600 }}>
+                      {tsumo ?? '—'}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
@@ -119,7 +130,7 @@ export const ScoreTableScreen: React.FC = () => {
             }}>
               <span style={{ color: '#ECC94B', fontSize: 13, fontWeight: 600 }}>{entry.label}</span>
               <span style={{ color: '#fff', fontSize: 13, textAlign: 'right', fontWeight: 600 }}>
-                {formatPoints(playerType === 'ko' ? entry.koRon : entry.oyaRon)}
+                {formatPoints((playerType === 'ko' ? entry.koRon : entry.oyaRon)!)}
               </span>
               <span style={{ color: '#fff', fontSize: 13, textAlign: 'right', fontWeight: 600 }}>
                 {playerType === 'ko' ? entry.koTsumo : entry.oyaTsumo}
