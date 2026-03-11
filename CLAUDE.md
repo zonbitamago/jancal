@@ -100,6 +100,14 @@ npm run dev
 - パイプライン: 手牌 → `analyzeHand()` → `judgeYaku()` → `calculateFu()` → `calculateScore()`
 - 点数計算ルールはMリーグ準拠（切り上げ満貫あり、数え役満なし）
 
+### リリース・バージョン管理
+- 機能追加・バグ修正など、リリースに含まれる変更を行う際は `package.json` の `version` を必ず更新すること
+- バージョンは [セマンティックバージョニング](https://semver.org/lang/ja/) に従う
+  - パッチ (x.y.Z): バグ修正
+  - マイナー (x.Y.0): 機能追加（後方互換あり）
+  - メジャー (X.0.0): 破壊的変更
+- バージョンはビルド時に `__APP_VERSION__` としてアプリに埋め込まれ、ホーム画面に表示される
+
 ### CI/CD
 - GitHub Actions でプッシュ時に自動テスト実行
 - `main` ブランチへのプッシュで GitHub Pages へ自動デプロイ
