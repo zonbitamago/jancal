@@ -66,7 +66,7 @@ src/
 - スペース区切りでグループ化: `"123m 456p 789s 11z"`
 - parseTiles() でフラット、parseTileGroups() でグループ化
 
-## テスト実行
+## コマンド
 
 ```bash
 # 全テスト
@@ -75,9 +75,31 @@ npm test
 # ウォッチモード
 npm run test:watch
 
-# ビルド
+# ビルド (TypeScriptチェック + Viteビルド)
 npm run build
 
 # 開発サーバー
 npm run dev
 ```
+
+## 開発ルール
+
+### 言語
+- コード内の変数名・関数名・型名: 英語
+- コメント・ドキュメント・コミットメッセージ: 日本語
+- UI表示テキスト: 日本語
+
+### コーディング規約
+- TypeScript strict モードを遵守
+- ドメインロジック (`src/domain/`) はReactに依存しないこと
+- 新しい役・ルールの追加時は必ずテストを書くこと
+- テストファイルは `src/__tests__/domain/` に配置
+
+### アーキテクチャ
+- ドメイン層 (`src/domain/`) とUI層 (`src/components/`, `src/screens/`) を分離
+- パイプライン: 手牌 → `analyzeHand()` → `judgeYaku()` → `calculateFu()` → `calculateScore()`
+- 点数計算ルールはMリーグ準拠（切り上げ満貫あり、数え役満なし）
+
+### CI/CD
+- GitHub Actions でプッシュ時に自動テスト実行
+- `main` ブランチへのプッシュで GitHub Pages へ自動デプロイ
