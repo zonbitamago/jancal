@@ -59,6 +59,7 @@ export class ProblemGenerator {
       case QuizLevel.beginner: return this.generateBeginner();
       case QuizLevel.intermediate: return this.generateIntermediate();
       case QuizLevel.advanced: return this.generateAdvanced();
+      case QuizLevel.fuPractice: return this.generateBeginner();
     }
   }
 
@@ -540,6 +541,7 @@ export class ProblemGenerator {
       case QuizLevel.beginner: return han >= 1 && han <= 3 && !isYakuman;
       case QuizLevel.intermediate: return han >= 2 && han <= 5 && !isYakuman;
       case QuizLevel.advanced: return han >= 5 || isYakuman;
+      case QuizLevel.fuPractice: return han >= 1 && !isYakuman;
     }
   }
 

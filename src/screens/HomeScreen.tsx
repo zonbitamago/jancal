@@ -7,6 +7,7 @@ const levelConfig = [
   { level: QuizLevel.beginner, label: '初級', sub: '符・翻から点数を計算', color: '#48BB78' },
   { level: QuizLevel.intermediate, label: '中級', sub: '手牌から点数を計算', color: '#ECC94B' },
   { level: QuizLevel.advanced, label: '上級', sub: '副露・複合役を含む', color: '#FC8181' },
+  { level: QuizLevel.fuPractice, label: '符計算', sub: '手牌から符を計算', color: '#9F7AEA' },
 ];
 
 export const HomeScreen: React.FC = () => {
@@ -87,6 +88,20 @@ export const HomeScreen: React.FC = () => {
           );
         })}
       </div>
+
+      {/* 点数早見表 */}
+      <button
+        onClick={() => navigate('/score-table')}
+        style={{
+          background: 'rgba(255,255,255,0.05)',
+          border: '1px solid #4299E166',
+          borderRadius: 12, padding: '12px 20px',
+          cursor: 'pointer', textAlign: 'center',
+          width: '100%', marginBottom: 16,
+        }}
+      >
+        <span style={{ color: '#4299E1', fontSize: 15, fontWeight: 600 }}>点数早見表</span>
+      </button>
 
       <button onClick={handleReset} style={{
         background: 'transparent', border: 'none', color: '#666',

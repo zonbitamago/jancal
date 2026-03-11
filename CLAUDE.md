@@ -31,6 +31,9 @@ src/
 │   ├── fuCalculator.ts        # 符計算（Mリーグルール: 連風牌2符）
 │   ├── scoreCalculator.ts     # 点数計算（切り上げ満貫あり、数え役満なし）
 │   ├── problemGenerator.ts    # 動的問題生成エンジン
+│   ├── fuQuizGenerator.ts     # 符計算特化クイズ生成エンジン
+│   ├── scoreTable.ts          # 点数早見表データ生成
+│   ├── scoreExplanation.ts    # 不正解時のステップバイステップ解説生成
 │   └── models/
 │       ├── hand.ts            # Hand, HandDecomposition, Chitoitsu/Kokushi
 │       ├── mentsu.ts          # Mentsu, MentsuType
@@ -48,7 +51,8 @@ src/
 │   └── Badge.tsx              # 情報バッジ
 ├── screens/
 │   ├── HomeScreen.tsx         # レベル選択画面
-│   └── QuizScreen.tsx         # クイズ画面
+│   ├── QuizScreen.tsx         # クイズ画面
+│   └── ScoreTableScreen.tsx   # 点数早見表画面
 ├── styles/
 │   └── app.css                # グローバルスタイル
 ├── App.tsx                    # ルーティング

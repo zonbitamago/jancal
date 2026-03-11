@@ -1,6 +1,6 @@
 {
   "name": "jancal",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "麻雀の点数計算をクイズ形式で練習するWebアプリ。",
   "type": "module",
   "scripts": {
