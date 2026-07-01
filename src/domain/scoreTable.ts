@@ -9,6 +9,7 @@ export interface ScoreTableEntry {
   oyaTsumo: string | null;
   label?: string;
   note?: string;
+  isKiriage?: boolean;
 }
 
 export function generateScoreTable(): ScoreTableEntry[] {
@@ -41,6 +42,7 @@ export function generateScoreTable(): ScoreTableEntry[] {
         oyaRon: oyaRon?.ronPoints ?? null,
         oyaTsumo: oyaTsumo.toAnswerString(),
         note: fu === 20 ? 'ピンフツモ' : fu === 25 ? '七対子' : undefined,
+        isKiriage: (han === 4 && fu === 30) || (han === 3 && fu === 60),
       });
     }
   }

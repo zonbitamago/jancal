@@ -141,4 +141,14 @@ describe('FuCalculator', () => {
     const ankan = new Mentsu(MentsuType.ankan, [_t(9, TileType.man), _t(9, TileType.man), _t(9, TileType.man), _t(9, TileType.man)]);
     expect(ankan.fuValue).toBe(32);
   });
+
+  test('喰い平和形（鳴き・全順子・両面・非役牌頭）: ロンは30符、ツモも30符', () => {
+    const decomp = new HandDecomposition(
+      [_shuntsu(2, TileType.man), _shuntsu(3, TileType.pin), _shuntsu(4, TileType.sou), _shuntsu(6, TileType.man)],
+      [_t(5, TileType.pin), _t(5, TileType.pin)], WaitType.ryanmen
+    );
+    // 本来20符にしかならない鳴き形 → 30符へ切り上げ（20符ロンは存在しないため）
+    expect(calculateFu({ decomposition: decomp, isTsumo: false, isMenzen: false, isPinfu: false })).toBe(30);
+    expect(calculateFu({ decomposition: decomp, isTsumo: true, isMenzen: false, isPinfu: false })).toBe(30);
+  });
 });

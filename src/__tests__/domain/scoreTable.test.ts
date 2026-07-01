@@ -94,4 +94,16 @@ describe('ScoreTable', () => {
     expect(entry!.koRon).toBe(8000);
     expect(entry!.oyaRon).toBe(12000);
   });
+
+  test('isKiriage フラグが切り上げ満貫セルにのみ立つ', () => {
+    for (const e of table) {
+      if (e.label) continue; // 満貫以上は対象外
+      const expected = (e.han === 4 && e.fu === 30) || (e.han === 3 && e.fu === 60);
+      expect(!!e.isKiriage).toBe(expected);
+    }
+    expect(table.find(e => e.fu === 30 && e.han === 4)!.isKiriage).toBe(true);
+    expect(table.find(e => e.fu === 60 && e.han === 3)!.isKiriage).toBe(true);
+    // 親40符3翻(7700)は切り上げ対象外
+    expect(!!table.find(e => e.fu === 40 && e.han === 3)!.isKiriage).toBe(false);
+  });
 });

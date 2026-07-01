@@ -97,10 +97,24 @@ export const HomeScreen: React.FC = () => {
           border: '1px solid #4299E166',
           borderRadius: 12, padding: '12px 20px',
           cursor: 'pointer', textAlign: 'center',
-          width: '100%', marginBottom: 16,
+          width: '100%', marginBottom: 12,
         }}
       >
         <span style={{ color: '#4299E1', fontSize: 15, fontWeight: 600 }}>点数早見表</span>
+      </button>
+
+      {/* 符を学ぶ */}
+      <button
+        onClick={() => navigate('/learn-fu')}
+        style={{
+          background: 'rgba(255,255,255,0.05)',
+          border: '1px solid #9F7AEA66',
+          borderRadius: 12, padding: '12px 20px',
+          cursor: 'pointer', textAlign: 'center',
+          width: '100%', marginBottom: 16,
+        }}
+      >
+        <span style={{ color: '#9F7AEA', fontSize: 15, fontWeight: 600 }}>符を学ぶ</span>
       </button>
 
       <button onClick={handleReset} style={{
