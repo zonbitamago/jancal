@@ -30,3 +30,61 @@ button:focus-visible {
   outline: 2px solid #4299E1;
   outline-offset: 2px;
 }
+
+/* ===== 点数早見表（マトリクス版） ===== */
+.st-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.st-back{background:transparent;border:none;color:#aaa;font-size:20px;cursor:pointer;padding:4px}
+.st-title{color:#fff;font-size:18px;font-weight:700;margin:0}
+.st-toggles{display:flex;gap:8px;margin-bottom:14px}
+.st-seg{flex:1;display:flex;background:rgba(255,255,255,.05);border-radius:10px;padding:3px;gap:3px}
+.st-seg button{flex:1;border:none;background:transparent;color:#8a94a6;font-family:inherit;font-weight:600;font-size:14px;padding:8px 0;border-radius:8px;cursor:pointer;transition:.15s}
+.st-seg.ko button.on{background:#4299E1;color:#08111f}
+.st-seg.oya button.on{background:#ECC94B;color:#2a1e00}
+.st-seg.ron button.on{background:#cfd6e2;color:#111}
+.st-seg.tsumo button.on{background:#68D391;color:#06210f}
+.st-table{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden}
+.st-row{display:grid;grid-template-columns:46px repeat(4,1fr)}
+.st-row + .st-row{border-top:1px solid rgba(255,255,255,.06)}
+.st-head{background:rgba(255,255,255,.07)}
+.st-head .st-cell{color:#8a94a6;font-size:11px;font-weight:600;font-family:'Noto Sans JP',sans-serif}
+.st-cell{padding:9px 3px;text-align:center;font-size:14px;font-variant-numeric:tabular-nums;font-family:'Shippori Mincho',serif;color:#eef1f6;display:flex;align-items:center;justify-content:center}
+.st-fucell{background:rgba(255,255,255,.06);color:#cbd3df;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:600;flex-direction:column;line-height:1.1;gap:1px}
+.st-fucell small{color:#68D391;font-size:8.5px;font-weight:600}
+.st-na{color:#4a5568}
+.st-split{font-size:11.5px;letter-spacing:-.3px}
+.st-kiri{background:rgba(207,169,74,.16);color:#ECC94B;font-weight:700}
+.st-kiri sup{font-size:8px;color:#ECC94B;margin-left:1px}
+.st-legend{font-size:11px;color:#7b8698;margin-top:10px;line-height:1.7}
+.st-legend .gold{color:#ECC94B;font-weight:700}
+.st-sectitle{font-size:13px;font-weight:700;margin:22px 0 8px;font-family:'Noto Sans JP',sans-serif}
+.st-row.lim{grid-template-columns:1fr 1fr}
+.st-row.lim .st-cell:first-child{background:rgba(255,255,255,.06);color:#ECC94B;font-weight:700;font-family:'Noto Sans JP',sans-serif;font-size:13px}
+
+/* ===== 符を学ぶ ===== */
+.fl-lead{color:#aab3c2;font-size:13px;line-height:1.7;margin:2px 0 16px}
+.fl-lead b{color:#ECC94B}
+.fl-refgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fl-refbox{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:12px}
+.fl-refbox h4{margin:0 0 4px;font-size:13px;color:#eef1f6;font-weight:700}
+.fl-refbox .v{font-family:'Shippori Mincho',serif;font-size:22px;color:#ECC94B;font-weight:700}
+.fl-refbox .v small{font-size:12px;color:#cbd3df}
+.fl-refbox p{margin:5px 0 0;font-size:11.5px;color:#8a94a6;line-height:1.5}
+.fl-mini{border-collapse:collapse;width:100%;margin-top:12px;background:rgba(255,255,255,.04);border-radius:8px;overflow:hidden}
+.fl-mini td{padding:7px 10px;font-size:12.5px;border-bottom:1px solid rgba(255,255,255,.06);color:#d5dae3}
+.fl-mini td:last-child{text-align:right;font-family:'Shippori Mincho',serif;color:#ECC94B;font-weight:700}
+.fl-sectitle{font-size:14px;font-weight:700;margin:24px 0 10px;color:#9F7AEA}
+.fl-field{margin-bottom:10px}
+.fl-field label{font-size:11px;color:#8a94a6;display:block;margin-bottom:5px}
+.fl-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fl-select{width:100%;background:rgba(255,255,255,.06);color:#eef1f6;border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:9px 10px;font-family:inherit;font-size:13px}
+.fl-melds{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.fl-out{margin-top:16px;background:linear-gradient(180deg,rgba(159,122,234,.10),rgba(255,255,255,.03));border:1px solid rgba(159,122,234,.3);border-radius:14px;padding:16px;text-align:center}
+.fl-fu{font-family:'Shippori Mincho',serif;font-size:44px;font-weight:800;color:#ECC94B;line-height:1}
+.fl-fu small{font-size:19px;color:#eef1f6;margin-left:3px}
+.fl-parts{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.fl-part{font-size:11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:3px 9px;color:#d5dae3}
+.fl-part b{color:#ECC94B;font-family:'Shippori Mincho',serif}
+.fl-note{font-size:12px;color:#68D391;margin-top:9px;min-height:1em}
+.fl-ex{margin-top:14px;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+.fl-ex span{font-size:12px;color:#aab3c2}
+.fl-ex .exval{font-family:'Shippori Mincho',serif;color:#eef1f6;font-size:13.5px}

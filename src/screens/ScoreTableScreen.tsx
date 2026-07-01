@@ -2,147 +2,120 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { generateScoreTable, ScoreTableEntry } from '../domain/scoreTable';
 
-type PlayerType = 'ko' | 'oya';
+type Player = 'ko' | 'oya';
+type WinBy = 'ron' | 'tsumo';
+
+const FU_ROWS = [20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 110];
+const HAN_COLS = [1, 2, 3, 4];
+const LIMITS = ['満貫', '跳満', '倍満', '三倍満', '役満'];
+
+function fmtTsumo(s: string | null): string | null {
+  if (s == null) return null;
+  return s.replace(' all', 'オール');
+}
 
 export const ScoreTableScreen: React.FC = () => {
   const navigate = useNavigate();
-  const [playerType, setPlayerType] = useState<PlayerType>('ko');
+  const [player, setPlayer] = useState<Player>('ko');
+  const [winBy, setWinBy] = useState<WinBy>('ron');
   const table = useMemo(() => generateScoreTable(), []);
 
-  // 通常エントリ（符×翻）と特殊エントリ（満貫以上）を分離
-  const normalEntries = table.filter(e => !e.label);
-  const specialEntries = table.filter(e => e.label);
+  const lookup = useMemo(() => {
+    const m = new Map<string, ScoreTableEntry>();
+    for (const e of table) if (!e.label) m.set(`${e.fu}-${e.han}`, e);
+    return m;
+  }, [table]);
+  const limitEntries = useMemo(() => table.filter(e => e.label), [table]);
 
-  // 翻ごとにグループ化
-  const hanValues = [...new Set(normalEntries.map(e => e.han))].sort((a, b) => a - b);
+  function cellFor(entry: ScoreTableEntry | undefined): { text: string; kiri: boolean; split: boolean } {
+    if (!entry) return { text: '—', kiri: false, split: false };
+    let val: string | null;
+    if (winBy === 'ron') {
+      const n = player === 'ko' ? entry.koRon : entry.oyaRon;
+      val = n != null ? String(n) : null;
+    } else {
+      val = fmtTsumo(player === 'ko' ? entry.koTsumo : entry.oyaTsumo);
+    }
+    if (val == null) return { text: '—', kiri: false, split: false };
+    return { text: val, kiri: !!entry.isKiriage, split: val.includes('/') };
+  }
 
   return (
     <div className="screen-container">
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <button onClick={() => navigate('/')} style={{
-          background: 'transparent', border: 'none', color: '#aaa',
-          fontSize: 20, cursor: 'pointer', padding: 4,
-        }}>←</button>
-        <h2 style={{ color: '#fff', fontSize: 18, fontWeight: 700, margin: 0 }}>点数早見表</h2>
+      <div className="st-header">
+        <button className="st-back" onClick={() => navigate('/')} aria-label="戻る">←</button>
+        <h2 className="st-title">点数早見表</h2>
         <div style={{ width: 28 }} />
       </div>
 
-      {/* 親/子切り替え */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        <button
-          onClick={() => setPlayerType('ko')}
-          style={{
-            flex: 1, padding: '10px 0', borderRadius: 8, border: 'none',
-            background: playerType === 'ko' ? '#4299E133' : 'rgba(255,255,255,0.05)',
-            color: playerType === 'ko' ? '#4299E1' : '#888',
-            fontWeight: 600, fontSize: 15, cursor: 'pointer',
-          }}
-        >
-          子
-        </button>
-        <button
-          onClick={() => setPlayerType('oya')}
-          style={{
-            flex: 1, padding: '10px 0', borderRadius: 8, border: 'none',
-            background: playerType === 'oya' ? '#ECC94B33' : 'rgba(255,255,255,0.05)',
-            color: playerType === 'oya' ? '#ECC94B' : '#888',
-            fontWeight: 600, fontSize: 15, cursor: 'pointer',
-          }}
-        >
-          親
-        </button>
+      <div className="st-toggles">
+        <div className={`st-seg ${player}`}>
+          <button className={player === 'ko' ? 'on' : ''} onClick={() => setPlayer('ko')}>子</button>
+          <button className={player === 'oya' ? 'on' : ''} onClick={() => setPlayer('oya')}>親</button>
+        </div>
+        <div className={`st-seg ${winBy}`}>
+          <button className={winBy === 'ron' ? 'on' : ''} onClick={() => setWinBy('ron')}>ロン</button>
+          <button className={winBy === 'tsumo' ? 'on' : ''} onClick={() => setWinBy('tsumo')}>ツモ</button>
+        </div>
       </div>
 
-      {/* 通常テーブル */}
-      {hanValues.map(han => {
-        const entries = normalEntries.filter(e => e.han === han);
-        return (
-          <div key={han} style={{ marginBottom: 16 }}>
-            <h3 style={{ color: '#B794F4', fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
-              {han}翻
-            </h3>
-            <div style={{
-              background: 'rgba(255,255,255,0.05)', borderRadius: 8,
-              overflow: 'hidden',
-            }}>
-              {/* ヘッダー */}
-              <div style={{
-                display: 'grid', gridTemplateColumns: '50px 1fr 1fr',
-                background: 'rgba(255,255,255,0.08)', padding: '8px 12px',
-              }}>
-                <span style={{ color: '#888', fontSize: 12 }}>符</span>
-                <span style={{ color: '#888', fontSize: 12, textAlign: 'right' }}>ロン</span>
-                <span style={{ color: '#888', fontSize: 12, textAlign: 'right' }}>ツモ</span>
+      <div className="st-table">
+        <div className="st-row st-head">
+          <div className="st-cell">符＼翻</div>
+          {HAN_COLS.map(h => <div key={h} className="st-cell">{h}翻</div>)}
+        </div>
+        {FU_ROWS.map(fu => {
+          const note = fu === 20 ? 'ピンフツモ' : fu === 25 ? '七対子' : null;
+          return (
+            <div key={fu} className="st-row">
+              <div className="st-cell st-fucell">
+                <span>{fu}符</span>
+                {note && <small>{note}</small>}
               </div>
-              {/* 行 */}
-              {entries.map(entry => {
-                const ron = playerType === 'ko' ? entry.koRon : entry.oyaRon;
-                const tsumo = playerType === 'ko' ? entry.koTsumo : entry.oyaTsumo;
+              {HAN_COLS.map(h => {
+                const c = cellFor(lookup.get(`${fu}-${h}`));
+                const cls =
+                  'st-cell' +
+                  (c.kiri ? ' st-kiri' : '') +
+                  (c.text === '—' ? ' st-na' : '') +
+                  (c.split ? ' st-split' : '');
                 return (
-                  <div key={`${entry.fu}-${entry.han}`} style={{
-                    display: 'grid', gridTemplateColumns: '50px 1fr 1fr',
-                    padding: '8px 12px', borderTop: '1px solid rgba(255,255,255,0.05)',
-                  }}>
-                    <span style={{ color: '#aaa', fontSize: 13 }}>
-                      {entry.fu}
-                      {entry.note && (
-                        <span style={{ color: '#68D391', fontSize: 10, display: 'block', lineHeight: 1.2 }}>
-                          {entry.note}
-                        </span>
-                      )}
-                    </span>
-                    <span style={{ color: ron != null ? '#fff' : '#555', fontSize: 13, textAlign: 'right', fontWeight: 600 }}>
-                      {ron != null ? formatPoints(ron) : '—'}
-                    </span>
-                    <span style={{ color: tsumo != null ? '#fff' : '#555', fontSize: 13, textAlign: 'right', fontWeight: 600 }}>
-                      {tsumo ?? '—'}
-                    </span>
+                  <div key={h} className={cls}>
+                    {c.text}
+                    {c.kiri && <sup>満</sup>}
                   </div>
                 );
               })}
             </div>
-          </div>
-        );
-      })}
-
-      {/* 満貫以上 */}
-      <div style={{ marginBottom: 16 }}>
-        <h3 style={{ color: '#FC8181', fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
-          満貫以上
-        </h3>
-        <div style={{
-          background: 'rgba(255,255,255,0.05)', borderRadius: 8,
-          overflow: 'hidden',
-        }}>
-          <div style={{
-            display: 'grid', gridTemplateColumns: '80px 1fr 1fr',
-            background: 'rgba(255,255,255,0.08)', padding: '8px 12px',
-          }}>
-            <span style={{ color: '#888', fontSize: 12 }}></span>
-            <span style={{ color: '#888', fontSize: 12, textAlign: 'right' }}>ロン</span>
-            <span style={{ color: '#888', fontSize: 12, textAlign: 'right' }}>ツモ</span>
-          </div>
-          {specialEntries.map(entry => (
-            <div key={entry.label} style={{
-              display: 'grid', gridTemplateColumns: '80px 1fr 1fr',
-              padding: '8px 12px', borderTop: '1px solid rgba(255,255,255,0.05)',
-            }}>
-              <span style={{ color: '#ECC94B', fontSize: 13, fontWeight: 600 }}>{entry.label}</span>
-              <span style={{ color: '#fff', fontSize: 13, textAlign: 'right', fontWeight: 600 }}>
-                {formatPoints((playerType === 'ko' ? entry.koRon : entry.oyaRon)!)}
-              </span>
-              <span style={{ color: '#fff', fontSize: 13, textAlign: 'right', fontWeight: 600 }}>
-                {playerType === 'ko' ? entry.koTsumo : entry.oyaTsumo}
-              </span>
-            </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
+      <div className="st-legend">
+        <span className="gold">■</span> 切り上げ満貫（30符4翻・60符3翻はMリーグルールで満貫）<br />
+        20符はツモのみ（平和ツモ）・2翻以上、25符は七対子で2翻以上。
+      </div>
+
+      <div className="st-sectitle" style={{ color: '#FC8181' }}>満貫以上</div>
+      <div className="st-table">
+        <div className="st-row lim st-head">
+          <div className="st-cell">役</div>
+          <div className="st-cell">{player === 'ko' ? '子' : '親'}・{winBy === 'ron' ? 'ロン' : 'ツモ'}</div>
+        </div>
+        {LIMITS.map(label => {
+          const e = limitEntries.find(x => x.label === label)!;
+          let val: string;
+          if (winBy === 'ron') val = String(player === 'ko' ? e.koRon : e.oyaRon);
+          else val = fmtTsumo(player === 'ko' ? e.koTsumo : e.oyaTsumo)!;
+          const split = val.includes('/');
+          return (
+            <div key={label} className="st-row lim">
+              <div className="st-cell">{label}</div>
+              <div className={'st-cell' + (split ? ' st-split' : '')}>{val}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="st-legend">数え役満なし ── 11翻以上は実役満でない限りすべて三倍満。</div>
     </div>
   );
 };
-
-function formatPoints(points: number): string {
-  return points.toLocaleString();
-}

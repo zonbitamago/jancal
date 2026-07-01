@@ -46,7 +46,12 @@ export function calculateFu(params: {
   }
 
   // 10符単位切上
-  return Math.ceil(fu / 10) * 10;
+  const rounded = Math.ceil(fu / 10) * 10;
+
+  // 喰い平和形: 鳴きで20符にしかならない形は30符
+  if (!isMenzen && rounded === 20) return 30;
+
+  return rounded;
 }
 
 function jantaiFu(jantai: Tile[], seatWind?: Tile, roundWind?: Tile): number {
