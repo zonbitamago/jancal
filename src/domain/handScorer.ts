@@ -27,6 +27,8 @@ export interface HandScoreInput {
   isIppatsu: boolean;
   /** ドラの牌種（1種につき1エントリ。手牌内の該当枚数だけ翻が増える） */
   dora: Tile[];
+  /** 赤ドラの枚数（赤5m/5p/5s。1枚につき1翻。ドラ表示牌とは独立に加算） */
+  akaDora?: number;
   /** 場風（1z東〜4z北）。役牌・ピンフ判定に使用 */
   roundWind?: Tile;
   /** 自風（1z東〜4z北）。役牌・ピンフ判定に使用 */
@@ -46,12 +48,13 @@ export interface HandScoreResult {
   isYakuman: boolean;
   yaku: YakuResult[];
   doraCount: number;
+  akaDora: number;
   isMenzen: boolean;
 }
 
 const EMPTY: HandScoreResult = {
   ok: false, scoreText: '', totalPoints: 0,
-  han: 0, fu: 0, isYakuman: false, yaku: [], doraCount: 0, isMenzen: true,
+  han: 0, fu: 0, isYakuman: false, yaku: [], doraCount: 0, akaDora: 0, isMenzen: true,
 };
 
 const MELD_TYPE_MAP: Record<OpenMeldType, MentsuType> = {
@@ -69,6 +72,7 @@ const MELD_TYPE_MAP: Record<OpenMeldType, MentsuType> = {
 export function scoreHand(input: HandScoreInput): HandScoreResult {
   const { tiles: concealed, winTile, isTsumo, isParent, isRiichi, isIppatsu, dora, roundWind, seatWind } = input;
   const openMelds = input.openMelds ?? [];
+  const akaDora = input.akaDora ?? 0;
 
   // 暗槓のみ、または副露なしの場合は門前
   const isMenzen = openMelds.length === 0 || openMelds.every(m => m.type === 'ankan');
@@ -114,7 +118,7 @@ export function scoreHand(input: HandScoreInput): HandScoreResult {
     if (yakuList.length === 0) continue; // 役なしの分解は不採用（ドラのみでは和了れない）
 
     const hasYakuman = yakuList.some(y => y.han >= 13);
-    const han = hasYakuman ? 13 : yakuList.reduce((sum, y) => sum + y.han, 0) + doraCount;
+    const han = hasYakuman ? 13 : yakuList.reduce((sum, y) => sum + y.han, 0) + doraCount + akaDora;
 
     const isPinfu = yakuList.some(y => y.name === 'ピンフ');
     const fu = hasYakuman
@@ -137,6 +141,7 @@ export function scoreHand(input: HandScoreInput): HandScoreResult {
         isYakuman: hasYakuman,
         yaku: yakuList,
         doraCount,
+        akaDora,
         isMenzen,
       };
     }

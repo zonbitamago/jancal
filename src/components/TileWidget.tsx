@@ -5,6 +5,7 @@ interface TileWidgetProps {
   tile: Tile;
   isWinTile?: boolean;
   isDora?: boolean;
+  isAka?: boolean;
 }
 
 const suitColors: Record<string, string> = {
@@ -26,10 +27,12 @@ const dragonDisplay: Record<number, { char: string; color: string }> = {
   7: { char: '中', color: '#E53E3E' },
 };
 
-export const TileWidget: React.FC<TileWidgetProps> = ({ tile, isWinTile, isDora }) => {
+export const TileWidget: React.FC<TileWidgetProps> = ({ tile, isWinTile, isDora, isAka }) => {
   const bg = isWinTile
     ? 'linear-gradient(180deg, #FFF8E1, #FFECB3)'
-    : '#F5F5F0';
+    : isAka
+      ? 'linear-gradient(180deg, #FFEBEE, #FFCDD2)'
+      : '#F5F5F0';
   const border = isDora
     ? '2.5px solid #E53E3E'
     : isWinTile
@@ -46,7 +49,7 @@ export const TileWidget: React.FC<TileWidgetProps> = ({ tile, isWinTile, isDora 
       alignItems: 'center', justifyContent: 'center',
       boxSizing: 'border-box',
     }}>
-      {isHonor ? renderHonor(tile) : renderSuit(tile)}
+      {isHonor ? renderHonor(tile) : renderSuit(tile, isAka)}
       {isDora && (
         <div style={{
           position: 'absolute', top: -4, right: -4,
@@ -60,8 +63,8 @@ export const TileWidget: React.FC<TileWidgetProps> = ({ tile, isWinTile, isDora 
   );
 };
 
-function renderSuit(tile: Tile) {
-  const color = suitColors[tile.type] ?? '#333';
+function renderSuit(tile: Tile, isAka?: boolean) {
+  const color = isAka ? '#D32F2F' : (suitColors[tile.type] ?? '#333');
   const suitChar = suitChars[tile.type] ?? '';
   return (
     <>

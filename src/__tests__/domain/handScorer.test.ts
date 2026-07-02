@@ -99,6 +99,45 @@ describe('scoreHand: 正常系', () => {
   });
 });
 
+describe('scoreHand: 赤ドラ', () => {
+  test('赤ドラ1枚で1翻増える（タンヤオ+ピンフ+赤1 → 30符3翻 3900）', () => {
+    const r = scoreHand({
+      tiles: parseTiles('234m 567p 234s 678s 55p'),
+      winTile: t('4m'),
+      isTsumo: false, isParent: false, isRiichi: false, isIppatsu: false,
+      dora: [], akaDora: 1,
+    });
+    expect(r.ok).toBe(true);
+    expect(r.akaDora).toBe(1);
+    expect(r.han).toBe(3); // タンヤオ1+ピンフ1+赤1
+    expect(r.scoreText).toBe('3900');
+  });
+
+  test('赤ドラは通常ドラと独立して加算される', () => {
+    // 2mが通常ドラ（234mの1枚）+ 赤1枚 = ドラ1+赤1
+    const r = scoreHand({
+      tiles: parseTiles('234m 567p 234s 678s 55p'),
+      winTile: t('4m'),
+      isTsumo: false, isParent: false, isRiichi: false, isIppatsu: false,
+      dora: [t('2m')], akaDora: 1,
+    });
+    expect(r.doraCount).toBe(1);
+    expect(r.akaDora).toBe(1);
+    expect(r.han).toBe(4); // タンヤオ1+ピンフ1+ドラ1+赤1 → 満貫
+    expect(r.scoreText).toBe('8000');
+  });
+
+  test('赤ドラ未指定時は0', () => {
+    const r = scoreHand({
+      tiles: parseTiles('234m 567p 234s 678s 55p'),
+      winTile: t('4m'),
+      isTsumo: false, isParent: false, isRiichi: false, isIppatsu: false,
+      dora: [],
+    });
+    expect(r.akaDora).toBe(0);
+  });
+});
+
 describe('scoreHand: 副露（鳴き）', () => {
   test('鳴きタンヤオ 30符1翻 子ロン → 1000（ポン）', () => {
     // 手の内: 234m 567p 345s 55m（11枚）+ ポン678s。アガリ4m
