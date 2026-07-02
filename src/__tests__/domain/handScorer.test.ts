@@ -127,6 +127,21 @@ describe('scoreHand: 赤ドラ', () => {
     expect(r.scoreText).toBe('8000');
   });
 
+  test('同じ5mが通常ドラかつ赤ドラの場合、両方が加算される（1枚で2翻）', () => {
+    // 345m 567p 234s 678s 55p、3mロン。5mを表ドラに指定＋その5mが赤
+    const r = scoreHand({
+      tiles: parseTiles('345m 567p 234s 678s 55p'),
+      winTile: t('3m'),
+      isTsumo: false, isParent: false, isRiichi: false, isIppatsu: false,
+      dora: [t('5m')], akaDora: 1,
+    });
+    expect(r.ok).toBe(true);
+    expect(r.doraCount).toBe(1); // 5mは手牌に1枚 → 表ドラ1
+    expect(r.akaDora).toBe(1);   // 赤ドラ1
+    expect(r.han).toBe(4);       // タンヤオ1+ピンフ1+ドラ1+赤1 → 満貫
+    expect(r.scoreText).toBe('8000');
+  });
+
   test('赤ドラ未指定時は0', () => {
     const r = scoreHand({
       tiles: parseTiles('234m 567p 234s 678s 55p'),
