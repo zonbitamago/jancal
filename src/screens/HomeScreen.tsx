@@ -89,6 +89,23 @@ export const HomeScreen: React.FC = () => {
         })}
       </div>
 
+      {/* 点数を計算する（手入力） */}
+      <button
+        onClick={() => navigate('/calc')}
+        style={{
+          background: 'rgba(159,122,234,0.12)',
+          border: '1px solid #9F7AEA66',
+          borderRadius: 12, padding: '14px 20px',
+          cursor: 'pointer', textAlign: 'center',
+          width: '100%', marginBottom: 12,
+        }}
+      >
+        <span style={{ color: '#B794F4', fontSize: 15, fontWeight: 700 }}>点数を計算する</span>
+        <span style={{ color: '#8a94a6', fontSize: 12, display: 'block', marginTop: 2 }}>
+          手牌を入力して点数を自動計算
+        </span>
+      </button>
+
       {/* 点数早見表 */}
       <button
         onClick={() => navigate('/score-table')}

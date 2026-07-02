@@ -30,6 +30,7 @@ src/
 │   ├── yakuJudge.ts           # 役判定（Mリーグ準拠 23役+役満3種）
 │   ├── fuCalculator.ts        # 符計算（Mリーグルール: 連風牌2符）
 │   ├── scoreCalculator.ts     # 点数計算（切り上げ満貫あり、数え役満なし）
+│   ├── handScorer.ts          # 手牌から点数を計算（門前・副露対応、高点法）
 │   ├── problemGenerator.ts    # 動的問題生成エンジン
 │   ├── fuQuizGenerator.ts     # 符計算特化クイズ生成エンジン
 │   ├── scoreTable.ts          # 点数早見表データ生成
@@ -52,6 +53,7 @@ src/
 ├── screens/
 │   ├── HomeScreen.tsx         # レベル選択画面
 │   ├── QuizScreen.tsx         # クイズ画面
+│   ├── ScoreCalcScreen.tsx    # 手入力点数計算画面（手牌入力→自動計算）
 │   └── ScoreTableScreen.tsx   # 点数早見表画面
 ├── styles/
 │   └── app.css                # グローバルスタイル
