@@ -19,8 +19,13 @@ interface Meld {
   tiles: Tile[];
 }
 
-type TapMode = 'win' | 'dora' | 'del' | null;
+type TapMode = 'win' | 'dora' | 'aka' | 'del' | null;
 type Suit = 'm' | 'p' | 's' | 'z';
+
+// 赤ドラになれるのは 5m / 5p / 5s のみ
+const isAkaCandidate = (tile: Tile): boolean =>
+  tile.number === 5 &&
+  (tile.type === TileType.man || tile.type === TileType.pin || tile.type === TileType.sou);
 
 const SUIT_TABS: { suit: Suit; label: string; color: string }[] = [
   { suit: 'm', label: '萬子', color: '#E53E3E' },
@@ -56,6 +61,8 @@ export const ScoreCalcScreen: React.FC = () => {
   const [hand, setHand] = useState<HandTile[]>([]);
   const [melds, setMelds] = useState<Meld[]>([]);
   const [doraKeys, setDoraKeys] = useState<Set<string>>(new Set());
+  // 赤ドラは牌インスタンス単位（手の内: "c{id}" / 副露: "m{meldId}-{index}"）
+  const [akaSet, setAkaSet] = useState<Set<string>>(new Set());
   const [curSuit, setCurSuit] = useState<Suit>('m');
   const [tapMode, setTapMode] = useState<TapMode>(null);
   const [meldMode, setMeldMode] = useState<OpenMeldType | null>(null);
@@ -113,10 +120,13 @@ export const ScoreCalcScreen: React.FC = () => {
     reset();
     if (tapMode === 'del') {
       setHand(h => h.filter(x => x.id !== ht.id));
+      setAkaSet(prev => { const n = new Set(prev); n.delete(`c${ht.id}`); return n; });
     } else if (tapMode === 'win') {
       setHand(h => h.map(x => ({ ...x, isWin: x.id === ht.id })));
     } else if (tapMode === 'dora') {
       toggleDora(ht.tile.key);
+    } else if (tapMode === 'aka') {
+      if (isAkaCandidate(ht.tile)) toggleAka(`c${ht.id}`);
     }
   };
 
@@ -129,13 +139,27 @@ export const ScoreCalcScreen: React.FC = () => {
     });
   };
 
+  // 赤ドラはインスタンス単位でトグル
+  const toggleAka = (instanceId: string) => {
+    setAkaSet(prev => {
+      const next = new Set(prev);
+      if (next.has(instanceId)) next.delete(instanceId); else next.add(instanceId);
+      return next;
+    });
+  };
+
   const delMeld = (id: number) => {
     reset();
     setMelds(ms => ms.filter(m => m.id !== id));
+    setAkaSet(prev => {
+      const n = new Set(prev);
+      for (const key of prev) if (key.startsWith(`m${id}-`)) n.delete(key);
+      return n;
+    });
   };
 
   const clearAll = () => {
-    setHand([]); setMelds([]); setDoraKeys(new Set());
+    setHand([]); setMelds([]); setDoraKeys(new Set()); setAkaSet(new Set());
     setTapMode(null); setMeldMode(null);
     setIsRiichi(false); setIsIppatsu(false);
     reset();
@@ -164,6 +188,11 @@ export const ScoreCalcScreen: React.FC = () => {
 
     const openMelds: OpenMeldInput[] = melds.map(m => ({ type: m.type, tiles: m.tiles }));
 
+    // 赤ドラ枚数（実在する牌インスタンスのみ数える）
+    const akaCount =
+      hand.filter(h => akaSet.has(`c${h.id}`)).length +
+      melds.reduce((s, m) => s + m.tiles.filter((_, i) => akaSet.has(`m${m.id}-${i}`)).length, 0);
+
     const r = scoreHand({
       tiles: hand.map(h => h.tile),
       openMelds,
@@ -173,6 +202,7 @@ export const ScoreCalcScreen: React.FC = () => {
       isRiichi: isMenzen && isRiichi,
       isIppatsu: isMenzen && isIppatsu,
       dora: doraTiles,
+      akaDora: akaCount,
       roundWind: makeTile(roundWind, 'z'),
       seatWind: makeTile(seatWind, 'z'),
     });
@@ -220,7 +250,7 @@ export const ScoreCalcScreen: React.FC = () => {
         )}
         {sortedHand.map(ht => (
           <div key={ht.id} onClick={() => onHandTap(ht)} style={{ cursor: tapMode ? 'pointer' : 'default' }}>
-            <TileWidget tile={ht.tile} isWinTile={ht.isWin} isDora={doraKeys.has(ht.tile.key)} />
+            <TileWidget tile={ht.tile} isWinTile={ht.isWin} isDora={doraKeys.has(ht.tile.key)} isAka={akaSet.has(`c${ht.id}`)} />
           </div>
         ))}
       </div>
@@ -236,13 +266,19 @@ export const ScoreCalcScreen: React.FC = () => {
             }}>
               <span style={{ color: '#FF9800', fontSize: 12, fontWeight: 700, minWidth: 34 }}>{MELD_LABELS[m.type]}</span>
               <div style={{ display: 'flex', gap: 1 }}>
-                {m.tiles.map((t, i) => (
-                  <div key={i}
-                    onClick={() => { if (tapMode === 'dora') { reset(); toggleDora(t.key); } }}
-                    style={{ transform: 'scale(0.82)', transformOrigin: 'left center', cursor: tapMode === 'dora' ? 'pointer' : 'default' }}>
-                    <TileWidget tile={t} isDora={doraKeys.has(t.key)} />
-                  </div>
-                ))}
+                {m.tiles.map((t, i) => {
+                  const tappable = tapMode === 'dora' || (tapMode === 'aka' && isAkaCandidate(t));
+                  return (
+                    <div key={i}
+                      onClick={() => {
+                        if (tapMode === 'dora') { reset(); toggleDora(t.key); }
+                        else if (tapMode === 'aka' && isAkaCandidate(t)) { reset(); toggleAka(`m${m.id}-${i}`); }
+                      }}
+                      style={{ transform: 'scale(0.82)', transformOrigin: 'left center', cursor: tappable ? 'pointer' : 'default' }}>
+                      <TileWidget tile={t} isDora={doraKeys.has(t.key)} isAka={akaSet.has(`m${m.id}-${i}`)} />
+                    </div>
+                  );
+                })}
               </div>
               <button onClick={() => delMeld(m.id)} style={{
                 marginLeft: 'auto', background: 'transparent', border: 'none',
@@ -258,6 +294,7 @@ export const ScoreCalcScreen: React.FC = () => {
         {([
           { m: 'win' as TapMode, label: 'アガリ牌', color: '#D4A017' },
           { m: 'dora' as TapMode, label: 'ドラ', color: '#E53E3E' },
+          { m: 'aka' as TapMode, label: '赤ドラ', color: '#D32F2F' },
           { m: 'del' as TapMode, label: '削除', color: '#718096' },
         ]).map(({ m, label, color }) => (
           <button key={m} onClick={() => { setMeldMode(null); setTapMode(tapMode === m ? null : m); }} style={{
@@ -272,8 +309,9 @@ export const ScoreCalcScreen: React.FC = () => {
       </div>
       {tapMode && (
         <p style={{ color: '#8a94a6', fontSize: 11, margin: '8px 2px 0' }}>
-          手の内の牌をタップして「{tapMode === 'win' ? 'アガリ牌' : tapMode === 'dora' ? 'ドラ' : '削除'}」を設定
+          牌をタップして「{tapMode === 'win' ? 'アガリ牌' : tapMode === 'dora' ? 'ドラ' : tapMode === 'aka' ? '赤ドラ' : '削除'}」を設定
           {tapMode === 'dora' && '（同じ牌はすべてドラになります）'}
+          {tapMode === 'aka' && '（赤5m/5p/5sのみ・1枚ずつ指定）'}
         </p>
       )}
 
@@ -521,6 +559,9 @@ const ResultView: React.FC<{
         ))}
         {result.doraCount > 0 && (
           <Badge label={`ドラ ${result.doraCount}翻`} color="#E53E3E33" textColor="#FC8181" />
+        )}
+        {result.akaDora > 0 && (
+          <Badge label={`赤ドラ ${result.akaDora}翻`} color="#D32F2F33" textColor="#EF9A9A" />
         )}
       </div>
     </div>
