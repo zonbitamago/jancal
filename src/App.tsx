@@ -4,6 +4,7 @@ import { HomeScreen } from './screens/HomeScreen';
 import { QuizScreen } from './screens/QuizScreen';
 import { ScoreTableScreen } from './screens/ScoreTableScreen';
 import { FuLearnScreen } from './screens/FuLearnScreen';
+import { ScoreCalcScreen } from './screens/ScoreCalcScreen';
 import { InstallPrompt } from './components/InstallPrompt';
 
 const App: React.FC = () => (
@@ -13,6 +14,7 @@ const App: React.FC = () => (
       <Route path="/quiz" element={<QuizScreen />} />
       <Route path="/score-table" element={<ScoreTableScreen />} />
       <Route path="/learn-fu" element={<FuLearnScreen />} />
+      <Route path="/calc" element={<ScoreCalcScreen />} />
     </Routes>
     <InstallPrompt />
   </BrowserRouter>
