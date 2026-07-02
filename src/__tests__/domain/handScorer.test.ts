@@ -99,6 +99,85 @@ describe('scoreHand: 正常系', () => {
   });
 });
 
+describe('scoreHand: 副露（鳴き）', () => {
+  test('鳴きタンヤオ 30符1翻 子ロン → 1000（ポン）', () => {
+    // 手の内: 234m 567p 345s 55m（11枚）+ ポン678s。アガリ4m
+    const r = scoreHand({
+      tiles: parseTiles('234m 567p 345s 55m'),
+      openMelds: [{ type: 'pon', tiles: parseTiles('678s') }],
+      winTile: t('4m'),
+      isTsumo: false, isParent: false, isRiichi: false, isIppatsu: false, dora: [],
+    });
+    expect(r.ok).toBe(true);
+    expect(r.isMenzen).toBe(false);
+    expect(r.yaku.some(y => y.name === 'タンヤオ')).toBe(true);
+    expect(r.scoreText).toBe('1000');
+  });
+
+  test('鳴き混一色は食い下がり2翻（ポン）', () => {
+    // 筒子+字牌の混一色。手の内: 123p 456p 789p 11z（11枚）+ ポン567p。アガリ1z
+    const r = scoreHand({
+      tiles: parseTiles('123p 456p 789p 11z'),
+      openMelds: [{ type: 'pon', tiles: parseTiles('567p') }],
+      winTile: t('1z'),
+      isTsumo: false, isParent: false, isRiichi: false, isIppatsu: false, dora: [],
+    });
+    expect(r.ok).toBe(true);
+    const honitsu = r.yaku.find(y => y.name === '混一色');
+    expect(honitsu?.han).toBe(2); // 門前3翻→鳴き2翻
+  });
+
+  test('役牌ポン（發）30符1翻 子ロン → 1000', () => {
+    // 手の内: 234m 678p 456s 33p（11枚）+ ポン發。アガリ3p
+    const r = scoreHand({
+      tiles: parseTiles('234m 678p 456s 33p'),
+      openMelds: [{ type: 'pon', tiles: parseTiles('666z') }],
+      winTile: t('3p'),
+      isTsumo: false, isParent: false, isRiichi: false, isIppatsu: false, dora: [],
+    });
+    expect(r.ok).toBe(true);
+    expect(r.yaku.some(y => y.name === '役牌')).toBe(true);
+    expect(r.scoreText).toBe('1000');
+  });
+
+  test('暗槓は門前を維持する（リーチ可）', () => {
+    // 手の内: 234m 567p 345s 55m（11枚）+ 暗槓1111s相当。アガリ4m、リーチ
+    const r = scoreHand({
+      tiles: parseTiles('234m 567p 55m 345s'),
+      openMelds: [{ type: 'ankan', tiles: parseTiles('1111z') }],
+      winTile: t('4m'),
+      isTsumo: false, isParent: false, isRiichi: true, isIppatsu: false, dora: [],
+    });
+    expect(r.ok).toBe(true);
+    expect(r.isMenzen).toBe(true);
+    expect(r.yaku.some(y => y.name === 'リーチ')).toBe(true);
+  });
+
+  test('鳴き手は門前役（ツモ・ピンフ）が付かない', () => {
+    const r = scoreHand({
+      tiles: parseTiles('234m 567p 345s 55m'),
+      openMelds: [{ type: 'chi', tiles: parseTiles('678s') }],
+      winTile: t('4m'),
+      isTsumo: true, isParent: false, isRiichi: false, isIppatsu: false, dora: [],
+    });
+    expect(r.ok).toBe(true);
+    expect(r.isMenzen).toBe(false);
+    expect(r.yaku.some(y => y.name === 'ツモ')).toBe(false);
+    expect(r.yaku.some(y => y.name === 'ピンフ')).toBe(false);
+  });
+
+  test('手の内の枚数が合わないとエラー', () => {
+    const r = scoreHand({
+      tiles: parseTiles('234m 567p 345s 678s 55m'), // 14枚（副露1つなら11枚のはず）
+      openMelds: [{ type: 'pon', tiles: parseTiles('111z') }],
+      winTile: t('4m'),
+      isTsumo: false, isParent: false, isRiichi: false, isIppatsu: false, dora: [],
+    });
+    expect(r.ok).toBe(false);
+    expect(r.error).toContain('11枚');
+  });
+});
+
 describe('scoreHand: 異常系', () => {
   test('14枚でない → エラー', () => {
     const r = scoreHand({

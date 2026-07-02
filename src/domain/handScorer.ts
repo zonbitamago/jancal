@@ -1,20 +1,31 @@
 import { Tile } from '../utils/tileParser';
-import { analyzeHand } from './handAnalyzer';
+import { analyzeHand, analyzeHandWithOpen } from './handAnalyzer';
 import { judgeYaku, countDora, YakuResult } from './yakuJudge';
 import { calculateFu } from './fuCalculator';
 import { calculateScore } from './scoreCalculator';
 import { createHand } from './models/hand';
+import { Mentsu, MentsuType } from './models/mentsu';
+
+export type OpenMeldType = 'chi' | 'pon' | 'minkan' | 'ankan';
+
+export interface OpenMeldInput {
+  type: OpenMeldType;
+  /** チー: 連続する3枚 / ポン: 同じ3枚 / カン: 同じ4枚 */
+  tiles: Tile[];
+}
 
 export interface HandScoreInput {
-  /** 手牌14枚（アガリ牌を含む）。門前手のみ対応。 */
+  /** 手の内の牌（アガリ牌を含む。副露を除いた部分）。枚数は 14 - 3×副露数。 */
   tiles: Tile[];
+  /** 副露（鳴き）。省略時は門前手として扱う。 */
+  openMelds?: OpenMeldInput[];
   /** アガリ牌 */
   winTile: Tile;
   isTsumo: boolean;
   isParent: boolean;
   isRiichi: boolean;
   isIppatsu: boolean;
-  /** ドラ（手牌内でドラに該当する牌。重複分だけ翻が増える） */
+  /** ドラの牌種（1種につき1エントリ。手牌内の該当枚数だけ翻が増える） */
   dora: Tile[];
   /** 場風（1z東〜4z北）。役牌・ピンフ判定に使用 */
   roundWind?: Tile;
@@ -35,39 +46,66 @@ export interface HandScoreResult {
   isYakuman: boolean;
   yaku: YakuResult[];
   doraCount: number;
+  isMenzen: boolean;
 }
 
 const EMPTY: HandScoreResult = {
   ok: false, scoreText: '', totalPoints: 0,
-  han: 0, fu: 0, isYakuman: false, yaku: [], doraCount: 0,
+  han: 0, fu: 0, isYakuman: false, yaku: [], doraCount: 0, isMenzen: true,
+};
+
+const MELD_TYPE_MAP: Record<OpenMeldType, MentsuType> = {
+  chi: MentsuType.shuntsu,
+  pon: MentsuType.minko,
+  minkan: MentsuType.minkan,
+  ankan: MentsuType.ankan,
 };
 
 /**
- * 手牌（門前）から点数を計算する。
+ * 手牌から点数を計算する。門前・副露の両方に対応。
  * 複数の面子分解が可能な場合は最も高い点数になる分解を採用する（高点法）。
  * 役が一つも無い場合や、アガリの形になっていない場合は ok=false を返す。
  */
 export function scoreHand(input: HandScoreInput): HandScoreResult {
-  const { tiles, winTile, isTsumo, isParent, isRiichi, isIppatsu, dora, roundWind, seatWind } = input;
+  const { tiles: concealed, winTile, isTsumo, isParent, isRiichi, isIppatsu, dora, roundWind, seatWind } = input;
+  const openMelds = input.openMelds ?? [];
 
-  if (tiles.length !== 14) {
-    return { ...EMPTY, error: '手牌はアガリ牌を含めて14枚にしてください' };
+  // 暗槓のみ、または副露なしの場合は門前
+  const isMenzen = openMelds.length === 0 || openMelds.every(m => m.type === 'ankan');
+
+  const expectedConcealed = 14 - 3 * openMelds.length;
+  if (openMelds.length > 4) {
+    return { ...EMPTY, isMenzen, error: '副露は4つまでです' };
   }
-  if (!tiles.some(t => t.equals(winTile))) {
-    return { ...EMPTY, error: 'アガリ牌が手牌に含まれていません' };
+  if (concealed.length !== expectedConcealed) {
+    return {
+      ...EMPTY, isMenzen,
+      error: `手の内は${expectedConcealed}枚にしてください（アガリ牌を含む・現在${concealed.length}枚）`,
+    };
+  }
+  if (!concealed.some(t => t.equals(winTile))) {
+    return { ...EMPTY, isMenzen, error: 'アガリ牌が手の内に含まれていません' };
   }
 
-  const decompositions = analyzeHand(tiles, winTile);
+  const openMentsu = openMelds.map(m => new Mentsu(MELD_TYPE_MAP[m.type], m.tiles));
+
+  const decompositions = openMelds.length > 0
+    ? analyzeHandWithOpen(concealed, winTile, openMentsu)
+    : analyzeHand(concealed, winTile);
+
   if (decompositions.length === 0) {
-    return { ...EMPTY, error: 'アガリの形になっていません（4面子1雀頭・七対子・国士無双のいずれか）' };
+    return { ...EMPTY, isMenzen, error: 'アガリの形になっていません（4面子1雀頭・七対子・国士無双のいずれか）' };
   }
+
+  // 役判定・タンヤオ・混一色などは副露牌も含めた全体で判定する
+  const allTiles = [...concealed, ...openMelds.flatMap(m => m.tiles)];
 
   const hand = createHand({
-    tiles, winTile, isTsumo, isMenzen: true, isParent,
-    isRiichi, isIppatsu, dora, roundWind, seatWind,
+    tiles: allTiles, winTile, isTsumo, isMenzen, isParent,
+    isRiichi, isIppatsu, dora, roundWind, seatWind, openMentsu,
   });
 
-  const doraCount = countDora(tiles, dora);
+  const doraCount = countDora(allTiles, dora);
 
   let best: HandScoreResult | null = null;
 
@@ -76,12 +114,12 @@ export function scoreHand(input: HandScoreInput): HandScoreResult {
     if (yakuList.length === 0) continue; // 役なしの分解は不採用（ドラのみでは和了れない）
 
     const hasYakuman = yakuList.some(y => y.han >= 13);
-    let han = hasYakuman ? 13 : yakuList.reduce((sum, y) => sum + y.han, 0) + doraCount;
+    const han = hasYakuman ? 13 : yakuList.reduce((sum, y) => sum + y.han, 0) + doraCount;
 
     const isPinfu = yakuList.some(y => y.name === 'ピンフ');
     const fu = hasYakuman
       ? 0
-      : calculateFu({ decomposition: decomp, isTsumo, isMenzen: true, isPinfu, seatWind, roundWind });
+      : calculateFu({ decomposition: decomp, isTsumo, isMenzen, isPinfu, seatWind, roundWind });
 
     const result = calculateScore({ fu, han, isParent, isTsumo, isYakuman: hasYakuman });
 
@@ -99,12 +137,13 @@ export function scoreHand(input: HandScoreInput): HandScoreResult {
         isYakuman: hasYakuman,
         yaku: yakuList,
         doraCount,
+        isMenzen,
       };
     }
   }
 
   if (!best) {
-    return { ...EMPTY, error: '役がありません（リーチ・タンヤオなど役が1つ以上必要です）' };
+    return { ...EMPTY, isMenzen, error: '役がありません（リーチ・タンヤオ・役牌など役が1つ以上必要です）' };
   }
 
   return best;
